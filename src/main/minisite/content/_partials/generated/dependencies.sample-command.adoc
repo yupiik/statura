@@ -1,0 +1,3 @@
+java \
+ -cp "statura-1.0-SNAPSHOT.jar::fusion-api-1.0.34.jar:fusion-cli-1.0.34.jar:fusion-httpclient-1.0.34.jar:fusion-json-1.0.34.jar" \
+ io.yupiik.fusion.framework.api.main.CliLauncher ...

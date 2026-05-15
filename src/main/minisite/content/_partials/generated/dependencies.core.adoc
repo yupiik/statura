@@ -1,0 +1,5 @@
+* `io.yupiik.observability:statura:1.0-SNAPSHOT`    
+* `io.yupiik.fusion:fusion-api:1.0.34:jar`    
+* `io.yupiik.fusion:fusion-cli:1.0.34:jar`    
+* `io.yupiik.fusion:fusion-httpclient:1.0.34:jar`    
+* `io.yupiik.fusion:fusion-json:1.0.34:jar`

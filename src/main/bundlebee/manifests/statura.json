@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/yupiik/bundlebee/gh-pages/generated/jsonschema/manifest.descriptor.json",
+  "interpolateAlveoli": true,
+  "alveoli": [
+    {
+      "$type": "application",
+      "name": "statura",
+      "descriptors": [
+        { "name": "applications/statura/serviceaccount.json" },
+        { "name": "applications/statura/secret.json" },
+        { "name": "applications/statura/configmap.json" },
+        { "name": "applications/statura/cronjob.json" }
+      ]
+    }
+  ]
+}

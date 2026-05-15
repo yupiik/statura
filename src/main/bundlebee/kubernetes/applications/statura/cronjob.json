@@ -1,0 +1,83 @@
+{
+  "$schema": "https://raw.githubusercontent.com/yupiik/bundlebee/gh-pages/generated/jsonschema/manifest.descriptor.json",
+  "apiVersion": "batch/v1",
+  "kind": "CronJob",
+  "metadata": {
+    "name": "{{statura.cronjob.name:-{{statura.name:-statura}}}}",
+    "namespace": "{{statura.namespace:-statura}}",
+    "labels": {{statura.cronjob.labels:-{{statura.labels:-{} }} }},
+    "annotations": {{statura.cronjob.annotations:-{{statura.annotations:-{} }} }}
+  },
+  "spec": {
+    "schedule": "{{statura.cronjob.schedule:-*/5 * * * *}}",
+    "startingDeadlineSeconds": {{statura.cronjob.startingDeadlineSeconds:-120}},
+    "concurrencyPolicy": "{{statura.cronjob.concurrencyPolicy:-Forbid}}",
+    "successfulJobsHistoryLimit": {{statura.cronjob.successfulJobsHistoryLimit:-3}},
+    "failedJobsHistoryLimit": {{statura.cronjob.failedJobsHistoryLimit:-1}},
+    "jobTemplate": {
+      "spec": {
+        "backoffLimit": {{statura.cronjob.backoffLimit:-2}},
+        "ttlSecondsAfterFinished": {{statura.cronjob.ttlSecondsAfterFinished:-300}},
+        "template": {
+          "metadata": {
+            "labels": {{statura.cronjob.podLabels:-{{statura.labels:-{} }} }},
+            "annotations": {{statura.cronjob.podAnnotations:-{{statura.annotations:-{} }} }}
+          },
+          "spec": {
+            "restartPolicy": "{{statura.cronjob.restartPolicy:-OnFailure}}",
+            "serviceAccountName": "{{statura.serviceAccount.name:-{{statura.name:-statura}}}}",
+            "imagePullSecrets": {{statura.cronjob.imagePullSecrets:-[]}},
+            "securityContext": {{statura.podSecurityContext:-{}}},
+            "containers": [{
+              "name": "monitor",
+              "securityContext": {{statura.containerSecurityContext:-{}}},
+              "image": "{{statura.image.repository:-statura}}:{{statura.image.tag:-{{project.version}}}}",
+              "imagePullPolicy": "{{statura.image.pullPolicy:-IfNotPresent}}",
+              "args": [
+                "monitor"
+              ],
+              "env": [
+                {
+                  "name": "FUSION_CONFIGURATION_SOURCES_SECRETS",
+                  "value": "{{statura.secret.mount:-/opt/statura/secrets}}"
+                }
+              ],
+              "envFrom": [{
+                "configMapRef": { "name": "{{statura.configmap.name:-{{statura.name:-statura}}}}" }
+              }],
+              "volumeMounts": [
+                {
+                  "name": "tmp",
+                  "mountPath": "/tmp"
+                },
+                {
+                  "name": "secrets",
+                  "mountPath": "{{statura.secret.mount:-/opt/statura/secrets}}",
+                  "readOnly": true
+                }
+              ],
+              "resources": {{statura.resources:-{}}}
+            }],
+            "volumes": [
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "{{statura.tmp.size:-8Mi}}"
+                }
+              },
+              {
+                "name": "secrets",
+                "secret": {
+                  "secretName": "{{statura.secret.name:-{{statura.name:-statura}}}}"
+                }
+              }
+            ],
+            "nodeSelector": {{statura.nodeSelector:-{}}},
+            "affinity": {{statura.affinity:-{}}},
+            "tolerations": {{statura.tolerations:-[]}}
+          }
+        }
+      }
+    }
+  }
+}

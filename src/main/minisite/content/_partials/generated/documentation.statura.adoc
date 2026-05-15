@@ -1,0 +1,21 @@
+= statura
+
+== Configuration
+
+* `executor.checks.$index.http.assertions.$index.expected-value` (`EXECUTOR_CHECKS_INDEX_HTTP_ASSERTIONS_INDEX_EXPECTED_VALUE`) (default: `"true"`): Expected value.
+* `executor.checks.$index.http.assertions.$index.json-pointer` (`EXECUTOR_CHECKS_INDEX_HTTP_ASSERTIONS_INDEX_JSON_POINTER`) (default: `"/"`): JSON-Pointer to extract.
+* `executor.checks.$index.http.assertions.$index.operator` (`EXECUTOR_CHECKS_INDEX_HTTP_ASSERTIONS_INDEX_OPERATOR`) (default: `io.yupiik.statura.check.HttpCheckConfiguration.AssertionOperator.EXISTS`): Expected value.
+* `executor.checks.$index.http.body` (`EXECUTOR_CHECKS_INDEX_HTTP_BODY`) (default: `""`): For _write_ methods, the payload to send.
+* `executor.checks.$index.http.expected-status` (`EXECUTOR_CHECKS_INDEX_HTTP_EXPECTED_STATUS`) (default: `200`): Expected response status.
+* `executor.checks.$index.http.headers` (`EXECUTOR_CHECKS_INDEX_HTTP_HEADERS`) (default: `java.util.Map.of()`): HTTP headers to set.
+* `executor.checks.$index.http.method` (`EXECUTOR_CHECKS_INDEX_HTTP_METHOD`) (default: `"GET"`): HTTP method to use.
+* `executor.checks.$index.http.timeout` (`EXECUTOR_CHECKS_INDEX_HTTP_TIMEOUT`) (default: `"PT30S"`): Custom (java duration formatted) timeout for this check.
+* `executor.checks.$index.http.url` (`EXECUTOR_CHECKS_INDEX_HTTP_URL`): URL to call.
+* `executor.checks.$index.http.version` (`EXECUTOR_CHECKS_INDEX_HTTP_VERSION`) (default: `java.net.http.HttpClient.Version.HTTP_1_1`): HTTP protocol version.
+* `executor.checks.$index.name` (`EXECUTOR_CHECKS_INDEX_NAME`): Check name (or an internal one is generated).
+* `executor.checks.$index.type` (`EXECUTOR_CHECKS_INDEX_TYPE`) (default: `io.yupiik.statura.CheckExecutor.CheckType.HTTP`): Type of the validation.
+* `executor.default-timeout` (`EXECUTOR_DEFAULT_TIMEOUT`) (default: `"PT30S"`): Default timeout per check.
+* `executor.execution-timeout` (`EXECUTOR_EXECUTION_TIMEOUT`) (default: `"PT15M"`): Default timeout for the whole execution.
+* `executor.max-concurrent` (`EXECUTOR_MAX_CONCURRENT`) (default: `50`): Max parallel checks.
+* `executor.opentelemetry.endpoint` (`EXECUTOR_OPENTELEMETRY_ENDPOINT`): OpenTelemetry collector HTTP (JSON) endpoint for metrics.
+* `executor.opentelemetry.headers` (`EXECUTOR_OPENTELEMETRY_HEADERS`): Headers to send to respect OpenTelemetry collector endpoint.

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/yupiik/bundlebee/gh-pages/generated/jsonschema/manifest.descriptor.json",
+  "interpolateAlveoli": true,
+  "references": [
+    {
+      "path": "manifests/namespaces.json"
+    },
+    {
+      "path": "manifests/statura.json"
+    }
+  ],
+  "alveoli": [
+    {
+      "$type": "aggregator",
+      "name": "applications",
+      "dependencies": [
+        {
+          "name": "statura"
+        }
+      ]
+    },
+    {
+      "$type": "aggregate",
+      "name": "all",
+      "chainDependencies": true,
+      "dependencies": [
+        {
+          "name": "namespace:all"
+        },
+        {
+          "name": "applications"
+        }
+      ]
+    }
+  ]
+}
