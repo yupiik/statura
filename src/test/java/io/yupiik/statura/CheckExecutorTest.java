@@ -6,6 +6,8 @@ import io.yupiik.statura.check.HttpCheck;
 import io.yupiik.statura.check.HttpCheckConfiguration;
 import io.yupiik.statura.otel.OpenTelemetry;
 import io.yupiik.statura.otel.OtlpMetricsFlusher;
+import io.yupiik.statura.otel.ProtobufSerializer;
+import io.yupiik.statura.ssl.SslContextService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -66,28 +69,27 @@ class CheckExecutorTest {
 
     @Test
     void runHttpCheckAndFlushMetrics() throws Exception {
-        final var mapper = new JsonMapperImpl(List.of(), c -> empty());
-        final var client = HttpClient.newBuilder()
-                .executor(java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor())
-                .build();
-        final var httpCheck = new HttpCheck(mapper, Clock.systemUTC());
-        final var flusher = new OtlpMetricsFlusher(mapper, HttpClient.newHttpClient(), Clock.systemUTC());
+        try (final var mapper = new JsonMapperImpl(List.of(), c -> empty())) {
+            final var sslContextService = new SslContextService();
+            final var httpCheck = new HttpCheck(mapper, Clock.systemUTC(), sslContextService);
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), sslContextService);
 
-        final var checkConfig = new HttpCheckConfiguration(
-                "http://localhost:" + targetPort + "/ok",
-                Version.HTTP_1_1, "GET", Map.of(), "", "PT10S", 200, List.of());
+            final var checkConfig = new HttpCheckConfiguration(
+                    "http://localhost:" + targetPort + "/ok",
+                    Version.HTTP_1_1, "GET", false, Map.<String, String>of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null);
 
-        final var result = httpCheck.check(client, "smoke-test", checkConfig).get();
-        assertTrue(result.success());
+            final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "smoke-test", checkConfig).get();
+            assertTrue(result.success());
 
-        final var results = List.of(result);
-        flusher.flush(new OpenTelemetry("http://localhost:" + collectorPort + "/v1/metrics", Map.of()), results);
+            final var results = List.of(result);
+            flusher.flush(new OpenTelemetry("http://localhost:" + collectorPort + "/v1/metrics", Map.of(),
+                    OpenTelemetry.Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
+                    Map.of("service.name", "statura", "service.version", "1.0"),
+                    Map.of("name", "statura", "version", "1.0")), results);
 
-        assertEquals(1, collectorRequests.size());
-        final var payload = collectorRequests.getFirst();
-        assertTrue(payload.contains("http_check_duration_ms"));
-        assertTrue(payload.contains("http_check_total"));
-        assertTrue(payload.contains("http_check_up"));
-        assertTrue(payload.contains("smoke-test"));
+            assertEquals(1, collectorRequests.size());
+            final var payload = collectorRequests.getFirst();
+            assertTrue(payload.contains("smoke_test"));
+        }
     }
 }

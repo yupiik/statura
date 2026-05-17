@@ -10,38 +10,53 @@
           "name": "_templates/namespace/namespace.json",
           "interpolate": true,
           "await": true,
-          "awaitConditions": [{
-            "command": "apply",
-            "conditions": [{
-              "type": "JSON_POINTER",
-              "pointer": "/status/phase",
-              "value": "Active"
-            }]
-          }]
+          "awaitConditions": [
+            {
+              "command": "apply",
+              "conditions": [
+                {
+                  "type": "JSON_POINTER",
+                  "pointer": "/status/phase",
+                  "value": "Active"
+                }
+              ]
+            }
+          ]
         },
-        { "name": "_templates/namespace/registry.secret.json" }
+        {
+          "name": "_templates/namespace/registry.secret.json"
+        }
       ]
     },
     {
       "name": "namespace:statura",
-      "dependencies": [{ "name": "_namespace",
-        "includeIf": {
-          "operator": "ALL",
-          "conditions": [
-            {
-              "key": "statura.namespace.disabled",
-              "value": "true",
-              "type": "SYSTEM_PROPERTY",
-              "negate": true
-            }
-          ]
+      "dependencies": [
+        {
+          "name": "_namespace",
+          "includeIf": {
+            "operator": "ALL",
+            "conditions": [
+              {
+                "key": "statura.namespace.disabled",
+                "value": "true",
+                "type": "SYSTEM_PROPERTY",
+                "negate": true
+              }
+            ]
+          }
         }
-      }],
-      "placeholders": { "namespace.name": "statura" }
+      ],
+      "placeholders": {
+        "namespace.name": "statura"
+      }
     },
     {
       "name": "namespace:all",
-      "dependencies": [{ "name": "namespace:statura" }]
+      "dependencies": [
+        {
+          "name": "namespace:statura"
+        }
+      ]
     }
   ]
 }

@@ -6,17 +6,24 @@
 
   <groupId>io.yupiik.observability</groupId>
   <artifactId>statura</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>Yupiik Statura</name>
   <description>OTEL synthetic monitoring probe for URL/health checks.</description>
 
   <properties>
+    <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <yupiik-fusion.version>1.0.34</yupiik-fusion.version>
+    <yupiik-fusion.version>1.0.35-SNAPSHOT</yupiik-fusion.version>
     <yupiik-tools.version>1.2.14</yupiik-tools.version>
     <bundlebee.version>1.0.31</bundlebee.version>
+
+    <image.java.name>yupiik/${project.artifactId}</image.java.name>
+    <image.java.version>${project.version}</image.java.version>
+    <image.java.from>ossyupiik/java:25.0.3@sha256:d77a2c123fe9ea30f4938d76b0b7af4bafa14c29fb4a22cb52d1ff1fba916ad8</image.java.from>
+    <image.workdir>/opt/yupiik/statura</image.workdir>
 
     <deploy.work>${project.build.directory}/work</deploy.work>
     <minisite.output>${project.build.directory}/generated-site</minisite.output>
@@ -56,6 +63,13 @@
     </dependency>
 
     <dependency>
+      <groupId>io.yupiik.logging</groupId>
+      <artifactId>yupiik-logging-jul</artifactId>
+      <version>1.0.8</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
       <groupId>io.yupiik.fusion</groupId>
       <artifactId>fusion-documentation</artifactId>
       <version>${yupiik-fusion.version}</version>
@@ -73,6 +87,12 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>6.0.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>2.3.232</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -140,6 +160,47 @@
 
     <plugins>
       <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+        <version>2.9.1</version>
+        <executions>
+          <execution>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>makeBom</goal>
+            </goals>
+            <configuration>
+              <includeProvidedScope>false</includeProvidedScope>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
+        <version>9.2.0</version>
+        <executions>
+          <execution>
+            <id>init</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <generateGitPropertiesFile>false</generateGitPropertiesFile>
+          <dateFormat>yyyy-MM-dd'T'HH:mm:ss'Z'</dateFormat>
+          <dateFormatTimeZone>GMT</dateFormatTimeZone>
+          <includeOnlyProperties>
+            <includeOnlyProperty>^git.commit.time$</includeOnlyProperty>
+            <includeOnlyProperty>^git.commit.id$</includeOnlyProperty>
+            <includeOnlyProperty>^git.branch$</includeOnlyProperty>
+            <includeOnlyProperty>^git.remote.origin.url$</includeOnlyProperty>
+          </includeOnlyProperties>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -154,7 +215,6 @@
           <failIfNoTests>false</failIfNoTests>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -164,7 +224,6 @@
           </excludes>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>io.yupiik.maven</groupId>
         <artifactId>yupiik-tools-maven-plugin</artifactId>
@@ -314,7 +373,7 @@ java \
             </goals>
             <configuration>
               <kubeconfig>explicit</kubeconfig>
-              <ignoredPlaceholders>bundlebee-.*,project.*,maven.*,user.*,environment,deploytime,image.*</ignoredPlaceholders>
+              <ignoredPlaceholders>bundlebee_.*,bundlebee-.*,project.*,maven.*,user.*,environment,deploytime,image.*</ignoredPlaceholders>
               <failOnInvalidDescription>true</failOnInvalidDescription>
               <outputType>FILE</outputType>
               <alveolus>all</alveolus>
@@ -342,9 +401,6 @@ java \
         </executions>
         <configuration>
           <kubeNamespace>@unexistingNamespace</kubeNamespace>
-          <kubeImplicitlyDroppedAttributes>
-            /$schema|/$bundlebeeIgnoredLintingRules|/metadata/annotations/io.yupiik.bundlebee~1putOnUpdate
-          </kubeImplicitlyDroppedAttributes>
           <mavenRepositoriesDownloadsEnabled>true</mavenRepositoriesDownloadsEnabled>
           <manifest>${project.basedir}/src/main/bundlebee/manifest.json</manifest>
           <injectTimestamp>false</injectTimestamp>
@@ -356,7 +412,62 @@ java \
             <deploytime>${maven.build.timestamp}</deploytime>
             <maven.project.basedir>${project.basedir}</maven.project.basedir>
             <environment>${specific.placeholder}</environment>
+            <project_version>${project.version}</project_version>
+            <bundlebee_basedir>${project.basedir}/src/main/bundlebee</bundlebee_basedir>
           </customPlaceholders>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!--
+        mvn package jib:dockerBuild -DskipTests
+        OR
+        mvn package jib:build -DskipTests
+        -->
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <containerizingMode>packaged</containerizingMode>
+          <from>
+            <image>${image.java.from}</image>
+          </from>
+          <to>
+            <image>${image.java.name}:${image.java.version}</image>
+          </to>
+          <container>
+            <appRoot>${image.workdir}</appRoot>
+            <workingDirectory>${image.workdir}</workingDirectory>
+            <mainClass>io.yupiik.fusion.framework.api.main.CliLauncher</mainClass>
+            <jvmFlags>
+              <jvmFlag>-XX:MaxRAMPercentage=75</jvmFlag>
+              <jvmFlag>-XX:+ExitOnOutOfMemoryError</jvmFlag>
+              <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
+              <jvmFlag>-Djdk.serialFilter=!*</jvmFlag>
+              <jvmFlag>-Djdk.jndi.object.factoriesFilter=!*</jvmFlag>
+              <jvmFlag>-Dcom.sun.jndi.ldap.object.trustSerialData=false</jvmFlag>
+              <jvmFlag>-Djava.util.logging.manager=io.yupiik.logging.jul.YupiikLogManager</jvmFlag>
+              <jvmFlag>-Dio.yupiik.logging.jul.handler.AsyncHandler.formatter=json</jvmFlag>
+              <!-- disable DNS cache so all calls are _relevant_ -->
+              <jvmFlag>-Dsun.net.inetaddr.ttl=0</jvmFlag>
+            </jvmFlags>
+            <environment>
+              <LANG>en_US.UTF-8</LANG>
+            </environment>
+            <labels>
+              <org.opencontainers.image.revision>${git.commit.id}</org.opencontainers.image.revision>
+              <org.opencontainers.image.ref.name>${git.branch}</org.opencontainers.image.ref.name>
+              <org.opencontainers.image.source>${git.remote.origin.url}</org.opencontainers.image.source>
+              <org.opencontainers.image.created>${maven.build.timestamp}</org.opencontainers.image.created>
+              <org.opencontainers.image.authors>${project.artifactId}</org.opencontainers.image.authors>
+              <org.opencontainers.image.vendor>${project.groupId}</org.opencontainers.image.vendor>
+              <org.opencontainers.image.url>https://yupiik.io/statura/</org.opencontainers.image.url>
+              <org.opencontainers.image.documentation>https://yupiik.io/statura/</org.opencontainers.image.documentation>
+              <org.opencontainers.image.title>${project.name}</org.opencontainers.image.title>
+              <org.opencontainers.image.description>${project.description}</org.opencontainers.image.description>
+              <org.opencontainers.image.version>${project.version}</org.opencontainers.image.version>
+              <io.yupiik.cmd>docker run --user 1000 ${image.java.name}:${image.java.version} &lt;args&gt;</io.yupiik.cmd>
+            </labels>
+          </container>
         </configuration>
       </plugin>
     </plugins>

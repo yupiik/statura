@@ -3,6 +3,8 @@ package io.yupiik.statura.otel;
 import com.sun.net.httpserver.HttpServer;
 import io.yupiik.fusion.json.internal.JsonMapperImpl;
 import io.yupiik.statura.model.CheckResult;
+import io.yupiik.statura.otel.OpenTelemetry.Protocol;
+import io.yupiik.statura.ssl.SslContextService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
-import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -18,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -46,50 +48,50 @@ class OtlpMetricsFlusherTest {
 
     @Test
     void flushEmptyResultsDoesNothing() {
-        final var flusher = new OtlpMetricsFlusher(
-                new JsonMapperImpl(List.of(), c -> empty()),
-                HttpClient.newHttpClient(),
-                Clock.systemUTC());
-        flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of()), List.of());
-        assertEquals(0, capturedRequests.size());
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
+            flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
+                    Map.of("service.name", "statura", "service.version", "1.0"),
+                    Map.of("name", "statura", "version", "1.0")), List.of());
+            assertEquals(0, capturedRequests.size());
+        }
     }
 
     @Test
     void flushSingleResult() {
-        final var flusher = new OtlpMetricsFlusher(
-                new JsonMapperImpl(List.of(), c -> empty()),
-                HttpClient.newHttpClient(),
-                Clock.systemUTC());
-        final var results = List.of(new CheckResult(
-                "test-check", "http://example.com", 200, 42, System.nanoTime(), true, null));
-        flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of()), results);
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
+            final var results = List.of(new CheckResult(
+                    "test-check", Map.of("url", "http://example.com"), 42, System.nanoTime(), true, null));
+            flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
+                    Map.of("service.name", "statura", "service.version", "1.0"),
+                    Map.of("name", "statura", "version", "1.0")), results);
 
-        assertEquals(1, capturedRequests.size());
-        final var payload = capturedRequests.getFirst();
-        assertTrue(payload.contains("http_check_duration_ms"));
-        assertTrue(payload.contains("http_check_total"));
-        assertTrue(payload.contains("http_check_up"));
-        assertTrue(payload.contains("test-check"));
-        assertTrue(payload.contains("http://example.com"));
+            assertEquals(1, capturedRequests.size());
+            final var payload = capturedRequests.getFirst();
+            assertTrue(payload.contains("test_check"));
+            assertTrue(payload.contains("http://example.com"));
+        }
     }
 
     @Test
     void flushMultipleResults() {
-        final var flusher = new OtlpMetricsFlusher(
-                new JsonMapperImpl(List.of(), c -> empty()),
-                HttpClient.newHttpClient(),
-                Clock.systemUTC());
-        final var results = List.of(
-                new CheckResult("ok-check", "http://ok", 200, 10, 1000L, true, null),
-                new CheckResult("ko-check", "http://ko", 500, 20, 2000L, false, "error"));
-        flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of()), results);
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
+            final var results = List.of(
+                    new CheckResult("ok-check", Map.of("url", "http://ok", "status", "200"), 10, 1000L, true, null),
+                    new CheckResult("ko-check", Map.of("url", "http://ko", "status", "500"), 20, 2000L, false, "error"));
+            flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
+                    Map.of("service.name", "statura", "service.version", "1.0"),
+                    Map.of("name", "statura", "version", "1.0")), results);
 
-        assertEquals(1, capturedRequests.size());
-        final var payload = capturedRequests.getFirst();
-        assertTrue(payload.contains("ok-check"));
-        assertTrue(payload.contains("ko-check"));
-        assertTrue(payload.contains("http://ok"));
-        assertTrue(payload.contains("http://ko"));
+            assertEquals(1, capturedRequests.size());
+            final var payload = capturedRequests.getFirst();
+            assertTrue(payload.contains("ok_check"));
+            assertTrue(payload.contains("ko_check"));
+            assertTrue(payload.contains("http://ok"));
+            assertTrue(payload.contains("http://ko"));
+        }
     }
 
     @Test
@@ -103,15 +105,16 @@ class OtlpMetricsFlusherTest {
             errCollector.start();
             final var errPort = errCollector.getAddress().getPort();
 
-            final var flusher = new OtlpMetricsFlusher(
-                    new JsonMapperImpl(List.of(), c -> empty()),
-                    HttpClient.newHttpClient(),
-                    Clock.systemUTC());
-            final var results = List.of(new CheckResult(
-                    "test", "http://example.com", 200, 10, 1000L, true, null));
-            final var ex = assertThrows(IllegalStateException.class,
-                    () -> flusher.flush(new OpenTelemetry("http://localhost:" + errPort + "/v1/metrics", Map.of()), results));
-            assertTrue(ex.getMessage().contains("500"));
+            try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+                final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
+                final var results = List.of(new CheckResult(
+                        "test", Map.of("url", "http://example.com"), 10, 1000L, true, null));
+                final var ex = assertThrows(IllegalStateException.class,
+                        () -> flusher.flush(new OpenTelemetry("http://localhost:" + errPort + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
+                                Map.of("service.name", "statura", "service.version", "1.0"),
+                                Map.of("name", "statura", "version", "1.0")), results));
+                assertTrue(ex.getMessage().contains("500"));
+            }
         } finally {
             errCollector.stop(0);
         }
@@ -126,14 +129,49 @@ class OtlpMetricsFlusherTest {
             e.close();
         });
 
-        final var flusher = new OtlpMetricsFlusher(
-                new JsonMapperImpl(List.of(), c -> empty()),
-                HttpClient.newHttpClient(),
-                Clock.systemUTC());
-        final var results = List.of(new CheckResult(
-                "test", "http://example.com", 200, 10, 1000L, true, null));
-        flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v2/metrics", Map.of()), results);
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
+            final var results = List.of(new CheckResult(
+                    "test", Map.of("url", "http://example.com"), 10, 1000L, true, null));
+            flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v2/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
+                    Map.of("service.name", "statura", "service.version", "1.0"),
+                    Map.of("name", "statura", "version", "1.0")), results);
 
-        assertEquals(1, capturedRequests.size());
+            assertEquals(1, capturedRequests.size());
+        }
+    }
+
+    @Test
+    void flushProtobuf() {
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
+            final var results = List.of(
+                    new CheckResult("pb-check", Map.of("url", "http://pb", "status", "200"), 15, 3000L, true, null));
+            flusher.flush(new OpenTelemetry(
+                    "http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.PROTOBUF, HttpClient.Version.HTTP_1_1,
+                    List.of(), "", "", Map.of("service.name", "statura", "service.version", "1.0"),
+                    Map.of("name", "statura", "version", "1.0")), results);
+
+            assertEquals(1, capturedRequests.size());
+            final var body = capturedRequests.getFirst();
+            assertFalse(body.isEmpty(), body);
+            assertFalse(body.startsWith("{"), "protobuf body should not be JSON");
+        }
+    }
+
+    @Test
+    void flushProtobufProducesNonEmptyBinary() {
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
+            final var results = List.of(new CheckResult(
+                    "pb-bin", Map.of("url", "http://pb"), 10, 1000L, true, null));
+            flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.PROTOBUF,
+                    HttpClient.Version.HTTP_1_1, List.of(), "", "",
+                    Map.of("service.name", "statura", "service.version", "1.0"),
+                    Map.of("name", "statura", "version", "1.0")), results);
+            assertEquals(1, capturedRequests.size());
+            final var body = capturedRequests.getFirst();
+            assertFalse(body.isEmpty());
+        }
     }
 }

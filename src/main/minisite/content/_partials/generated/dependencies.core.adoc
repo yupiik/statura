@@ -1,5 +1,6 @@
-* `io.yupiik.observability:statura:1.0-SNAPSHOT`    
-* `io.yupiik.fusion:fusion-api:1.0.34:jar`    
-* `io.yupiik.fusion:fusion-cli:1.0.34:jar`    
-* `io.yupiik.fusion:fusion-httpclient:1.0.34:jar`    
-* `io.yupiik.fusion:fusion-json:1.0.34:jar`
+* `io.yupiik.observability:statura:1.0.0-SNAPSHOT`    
+* `io.yupiik.fusion:fusion-api:1.0.35-SNAPSHOT:jar`    
+* `io.yupiik.fusion:fusion-cli:1.0.35-SNAPSHOT:jar`    
+* `io.yupiik.fusion:fusion-httpclient:1.0.35-SNAPSHOT:jar`    
+* `io.yupiik.fusion:fusion-json:1.0.35-SNAPSHOT:jar`    
+* `io.yupiik.logging:yupiik-logging-jul:1.0.8:jar`

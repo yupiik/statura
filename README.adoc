@@ -1,0 +1,23 @@
+= Statura
+
+== Dev tips
+
+To run in minikube:
+
+[source,sh]
+----
+minikube start
+
+# deploy victoria metrics as a simple way to get otel feedback in dev env
+kubectl create namespace otel
+helm repo add vm https://victoriametrics.github.io/helm-charts/
+helm repo update
+helm install victoria-metrics oci://ghcr.io/victoriametrics/helm-charts/victoria-metrics-single  -n otel
+
+DRY_RUN=false _scripts/deploy.sh
+----
+
+TIP: UI is accessible using `kubectl port-forward -n otel openobserve 5080:5080`
+
+One way to run the cronjob manually is to use: `k logs -f $(kubectl create job --from=cronjob/statura statura-manual-$(date +%s) | sed 's/ created//' && sleep 2) | yucal`.
+

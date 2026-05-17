@@ -17,6 +17,9 @@ public record HttpCheckConfiguration(
         @Property(documentation = "HTTP method to use.", defaultValue = "\"GET\"")
         String method,
 
+        @Property(documentation = "Should redirects be followed.", defaultValue = "false")
+        boolean followRedirects,
+
         @Property(documentation = "HTTP headers to set.", defaultValue = "java.util.Map.of()")
         Map<String, String> headers,
 
@@ -30,7 +33,16 @@ public record HttpCheckConfiguration(
         int expectedStatus,
 
         @Property(documentation = "For JSON responses, some validations on the response payload..", defaultValue = "java.util.List.of()")
-        List<Assertion> assertions
+        List<Assertion> assertions,
+
+        @Property(value = "ssl-certificates", documentation = "Trusted CA certificates in PEM format for custom SSL trust.")
+        List<String> sslCertificates,
+
+        @Property(value = "ssl-client-certificate", documentation = "Client certificate in PEM format for mTLS.")
+        String sslClientCertificate,
+
+        @Property(value = "ssl-client-private-key", documentation = "Client private key in PEM format (PKCS#8) for mTLS.")
+        String sslClientPrivateKey
 ) {
     public record Assertion(
             @Property(value = "json-pointer", documentation = "JSON-Pointer to extract.", defaultValue = "\"/\"")

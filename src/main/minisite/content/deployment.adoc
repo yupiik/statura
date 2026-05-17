@@ -6,6 +6,7 @@
 :minisite-keywords: configuration, documentation
 :minisite-breadcrumb: Home[index.html] > Deployment
 :minisite-nav-prev-label: Cli
+:minisite-nav-prev: cli/index.html
 :minisite-nav-next-label: BundleBee
 
 [abstract]

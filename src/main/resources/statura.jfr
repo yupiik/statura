@@ -1,0 +1,17 @@
+<configuration version="2.0" label="Minimal HTTP">
+  <event name="jdk.DNSLookup">
+    <setting name="enabled">true</setting>
+  </event>
+  <event name="jdk.SSLHandshake">
+    <setting name="enabled">true</setting>
+  </event>
+  <event name="jdk.SocketRead">
+    <setting name="enabled">true</setting>
+  </event>
+  <event name="jdk.SocketWrite">
+    <setting name="enabled">true</setting>
+  </event>
+  <event name="jdk.X509Validation">
+    <setting name="enabled">true</setting>
+  </event>
+</configuration>

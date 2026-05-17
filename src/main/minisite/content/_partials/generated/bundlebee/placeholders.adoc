@@ -16,7 +16,7 @@ Container registry username
 
 `statura.affinity`::
 Pod affinity/anti-affinity rules
-Default: `{`.
+Default: `{} `.
 
 
 `statura.annotations`::
@@ -45,7 +45,7 @@ Monitor configuration (`data`) JSON content (checks, OTEL endpoint, timeouts)
 
 `statura.containerSecurityContext`::
 Container-level security context
-Default: `{`.
+Default: `{} `.
 
 
 `statura.cronjob.annotations`::
@@ -130,7 +130,7 @@ Default: `statura`.
 
 `statura.image.tag`::
 Container image tag
-Default: `1.0-SNAPSHOT`.
+Default: `1.0.0-SNAPSHOT`.
 
 
 `statura.labels`::
@@ -150,17 +150,17 @@ Default: `statura`.
 
 `statura.nodeSelector`::
 Node selector for scheduling
-Default: `{`.
+Default: `{} `.
 
 
 `statura.podSecurityContext`::
 Pod-level security context
-Default: `{`.
+Default: `{} `.
 
 
 `statura.resources`::
 Container resource requests and limits
-Default: `{`.
+Default: `{} `.
 
 
 `statura.secret.annotations`::

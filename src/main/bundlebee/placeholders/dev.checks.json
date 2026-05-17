@@ -1,0 +1,69 @@
+{
+  "EXECUTION_TIMEOUT": "PT5M",
+  "DEFAULT_TIMEOUT": "PT30S",
+
+  "OPENTELEMETRY_ENDPOINT": "http://victoria-metrics-victoria-metrics-single-server.otel.svc:8428/opentelemetry/v1/metrics",
+  "OPENTELEMETRY_PROTOCOL": "PROTOBUF",
+
+  "CHECKS_LENGTH": "8",
+
+  "CHECKS_0_NAME": "httpbin-get",
+  "CHECKS_0_TYPE": "HTTP",
+  "CHECKS_0_HTTP_URL": "http://httpbin.org/get",
+  "CHECKS_0_HTTP_METHOD": "GET",
+  "CHECKS_0_HTTP_EXPECTED_STATUS": "200",
+  "CHECKS_0_HTTP_TIMEOUT": "PT15S",
+
+  "CHECKS_1_NAME": "httpbin-post",
+  "CHECKS_1_TYPE": "HTTP",
+  "CHECKS_1_HTTP_URL": "https://httpbin.org/post",
+  "CHECKS_1_HTTP_METHOD": "POST",
+  "CHECKS_1_HTTP_BODY": "{\"hello\":\"world\"}",
+  "CHECKS_1_HTTP_HEADERS_CONTENT-TYPE": "application/json",
+  "CHECKS_1_HTTP_EXPECTED_STATUS": "200",
+  "CHECKS_1_HTTP_ASSERTIONS_LENGTH": "1",
+  "CHECKS_1_HTTP_ASSERTIONS_0_JSON_POINTER": "/json/hello",
+  "CHECKS_1_HTTP_ASSERTIONS_0_OPERATOR": "EXISTS",
+  "CHECKS_1_HTTP_ASSERTIONS_0_EXPECTED_VALUE": "true",
+
+  "CHECKS_2_NAME": "github-api",
+  "CHECKS_2_TYPE": "HTTP",
+  "CHECKS_2_HTTP_URL": "https://api.github.com",
+  "CHECKS_2_HTTP_EXPECTED_STATUS": "200",
+  "CHECKS_2_HTTP_ASSERTIONS_LENGTH": "1",
+  "CHECKS_2_HTTP_ASSERTIONS_0_JSON_POINTER": "/current_user_url",
+  "CHECKS_2_HTTP_ASSERTIONS_0_OPERATOR": "EXISTS",
+
+  "CHECKS_3_NAME": "dns-google",
+  "CHECKS_3_TYPE": "DNS",
+  "CHECKS_3_DNS_HOSTNAME": "google.com",
+  "CHECKS_3_DNS_TIMEOUT": "PT15S",
+
+  "CHECKS_4_NAME": "tcp-google-80",
+  "CHECKS_4_TYPE": "CONNECTION",
+  "CHECKS_4_CONNECTION_HOST": "google.com",
+  "CHECKS_4_CONNECTION_PORT": "80",
+  "CHECKS_4_CONNECTION_TIMEOUT": "PT15S",
+
+  "CHECKS_5_NAME": "tcp-google-443",
+  "CHECKS_5_TYPE": "CONNECTION",
+  "CHECKS_5_CONNECTION_HOST": "google.com",
+  "CHECKS_5_CONNECTION_PORT": "443",
+  "CHECKS_5_CONNECTION_TIMEOUT": "PT15S",
+
+  "CHECKS_6_NAME": "cert-github",
+  "CHECKS_6_TYPE": "X509",
+  "CHECKS_6_X509_HOST": "github.com",
+  "CHECKS_6_X509_PORT": "443",
+  "CHECKS_6_X509_EXPECTED_SUBJECT": "CN=github.com.*",
+  "CHECKS_6_X509_MIN_DAYS_UNTIL_EXPIRATION": "30",
+  "CHECKS_6_X509_VERIFY_HOSTNAME": "true",
+
+  "CHECKS_7_NAME": "cert-google",
+  "CHECKS_7_TYPE": "X509",
+  "CHECKS_7_X509_HOST": "www.google.com",
+  "CHECKS_7_X509_SNI": "www.google.com",
+  "CHECKS_7_X509_EXPECTED_ISSUER": ".*,O=Google.*",
+  "CHECKS_7_X509_EXPECTED_SANS": "dns:www.google.com",
+  "CHECKS_7_X509_MIN_DAYS_UNTIL_EXPIRATION": "15"
+}

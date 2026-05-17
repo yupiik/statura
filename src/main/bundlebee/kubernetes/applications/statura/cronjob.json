@@ -27,14 +27,14 @@
             "restartPolicy": "{{statura.cronjob.restartPolicy:-OnFailure}}",
             "serviceAccountName": "{{statura.serviceAccount.name:-{{statura.name:-statura}}}}",
             "imagePullSecrets": {{statura.cronjob.imagePullSecrets:-[]}},
-            "securityContext": {{statura.podSecurityContext:-{}}},
+            "securityContext": {{statura.podSecurityContext:-{} }},
             "containers": [{
               "name": "monitor",
-              "securityContext": {{statura.containerSecurityContext:-{}}},
-              "image": "{{statura.image.repository:-statura}}:{{statura.image.tag:-{{project.version}}}}",
+              "securityContext": {{statura.containerSecurityContext:-{} }},
+              "image": "{{statura.image.repository:-statura}}:{{statura.image.tag:-{{project_version}}}}",
               "imagePullPolicy": "{{statura.image.pullPolicy:-IfNotPresent}}",
               "args": [
-                "monitor"
+                "executor"
               ],
               "env": [
                 {
@@ -56,7 +56,7 @@
                   "readOnly": true
                 }
               ],
-              "resources": {{statura.resources:-{}}}
+              "resources": {{statura.resources:-{} }}
             }],
             "volumes": [
               {
@@ -72,8 +72,8 @@
                 }
               }
             ],
-            "nodeSelector": {{statura.nodeSelector:-{}}},
-            "affinity": {{statura.affinity:-{}}},
+            "nodeSelector": {{statura.nodeSelector:-{} }},
+            "affinity": {{statura.affinity:-{} }},
             "tolerations": {{statura.tolerations:-[]}}
           }
         }

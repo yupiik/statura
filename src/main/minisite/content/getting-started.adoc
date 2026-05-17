@@ -5,7 +5,8 @@
 :minisite-index-icon: play
 :minisite-keywords: configuration, documentation
 :minisite-breadcrumb: Home[index.html] > Getting Started
-:minisite-nav-next: cli
+:minisite-nav-next: cli/index.html
+:minisite-nav-next-label: CLI
 :minisite-nav-next-label: Configuration
 
 Statura is an OTEL synthetic monitoring probe. It runs a set of configurable HTTP health checks against your endpoints, evaluates assertions on the responses, and pushes the results as OpenTelemetry metrics to a collector.
