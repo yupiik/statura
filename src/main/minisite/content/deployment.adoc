@@ -35,4 +35,3 @@ TIP: all libraries are available on maven link:https://repo.maven.apache.org/mav
 
 You can use Yupiik link:https://www.yupiik.io/bundlebee/[BundleBee] to package and make your deployment configurable.
 Project provides out of the box an xref:bundlebee.adoc[alveolus] for BundleBee.
-

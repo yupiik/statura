@@ -7,7 +7,6 @@
 :minisite-breadcrumb: Home[index.html] > Getting Started
 :minisite-nav-next: cli/index.html
 :minisite-nav-next-label: CLI
-:minisite-nav-next-label: Configuration
 
 Statura is an OTEL synthetic monitoring probe. It runs a set of configurable HTTP health checks against your endpoints, evaluates assertions on the responses, and pushes the results as OpenTelemetry metrics to a collector.
 
@@ -88,6 +87,6 @@ Then run the native binary:
 
 == Next Steps
 
-* xref:cli.adoc[Configuration Reference] -- all configuration options and CLI parameters
+* xref:cli/index.adoc[CLI Reference] -- all configuration options and CLI parameters
 * xref:deployment.adoc[Deployment] -- running standalone or with Yupiik BundleBee on Kubernetes
 * xref:bundlebee.adoc[BundleBee Deployment] -- detailed Kubernetes CronJob setup

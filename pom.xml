@@ -282,6 +282,7 @@
           </excludes>
         </configuration>
       </plugin>
+      <!-- mvn [compile] yupiik-tools:serve-minisite -e -->
       <plugin>
         <groupId>io.yupiik.maven</groupId>
         <artifactId>yupiik-tools-maven-plugin</artifactId>
