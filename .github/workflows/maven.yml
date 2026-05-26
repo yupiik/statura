@@ -18,11 +18,12 @@ jobs:
           path: |
             /home/runner/work/statura/statura/.m2
           key: m2_repository
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.19.0
         with:
-          distribution: 'zulu'
           java-version: '25'
+          java-distribution: 'zulu'
+          maven-version: '4.0.0-rc-5'
       - name: Build
         run: mvn install -Dm2.location=/home/runner/work/statura/statura/.m2
       - name: Remove Snapshots Before Caching
@@ -38,11 +39,12 @@ jobs:
         with:
           path: /home/runner/work/statura/statura/.m2
           key: m2_repository
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.19.0
         with:
-          distribution: 'zulu'
           java-version: '25'
+          java-distribution: 'zulu'
+          maven-version: '4.0.0-rc-5'
       - name: Build
         run: mvn install -DskipTests ossindex:audit
       - name: Remove Snapshots Before Caching
