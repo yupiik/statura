@@ -74,7 +74,7 @@
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <yupiik-fusion.version>1.0.36</yupiik-fusion.version>
+    <yupiik-fusion.version>1.0.37-SNAPSHOT</yupiik-fusion.version>
     <yupiik-tools.version>1.2.14</yupiik-tools.version>
     <bundlebee.version>1.0.31</bundlebee.version>
 
@@ -212,6 +212,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.5.0</version>
+          <configuration>
+            <excludes>
+              <exclude>**/build/**</exclude>
+            </excludes>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -325,6 +330,16 @@
               <configuration>
                 <module>${project.artifactId}</module>
                 <includeEnvironmentNames>true</includeEnvironmentNames>
+              </configuration>
+            </preAction>
+            <preAction>
+              <type>io.yupiik.statura.build.GenerateJsonSchema</type>
+            </preAction>
+            <preAction>
+              <type>copy</type>
+              <configuration>
+                <from>${project.basedir}/src/main/minisite/content/_partials/generated/jsonschema.json</from>
+                <to>${project.build.directory}/${project.build.finalName}/jsonschema/jsonschema.json</to>
               </configuration>
             </preAction>
           </preActions>

@@ -38,7 +38,7 @@ mvn clean package -DskipTests
 
 == Run Locally
 
-Create a configuration file `config.json`:
+Create a configuration file `statura.json` - it is controlled with `statura.configurationLocation` system properties (or `STATURA_CONFIGURATIONLOCATION` environment variable):
 
 [source,json]
 ----
@@ -61,6 +61,9 @@ Create a configuration file `config.json`:
   "default-timeout": "PT30S"
 }
 ----
+
+TIP: this is exactly the xref:cli/executor.adoc[executor] CLI options but using a hierarchic (or not) style in a JSON file. The `-` are replaced by `dot` when the JSON is flattened.
+You can see the JSON-Schema at link:jsonschema/jsonschema.json[JSON-Schema,window=_blank].
 
 Then run:
 
