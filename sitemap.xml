@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
     <url>
-        <loc>/bundlebee.html</loc>
+        <loc>/statura/bundlebee.html</loc>
         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
-        <loc>/deployment.html</loc>
+        <loc>/statura/deployment.html</loc>
         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
-        <loc>/getting-started.html</loc>
+        <loc>/statura/getting-started.html</loc>
         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
-        <loc>/cli/index.html</loc>
+        <loc>/statura/cli/index.html</loc>
         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
-        <loc>/cli/executor.html</loc>
+        <loc>/statura/cli/executor.html</loc>
         <lastmod>2026-06-01</lastmod>
     </url>
 </urlset>
