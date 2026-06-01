@@ -63,8 +63,8 @@ The primary goal of this project is to ensure observability uptime of applicatio
 
 == Environment
 
-- Uses Java 17+
-- Maven-based build system
+- Uses Java 25+
+- Maven-based build system (4.0.0+)
 - Kubernetes cluster deployment targets
 
 == Special Notes
