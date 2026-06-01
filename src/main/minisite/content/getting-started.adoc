@@ -38,7 +38,7 @@ mvn clean package -DskipTests
 
 == Run Locally
 
-Create a configuration file `statura.json` - it is controlled with `statura.configurationLocation` system properties (or `STATURA_CONFIGURATIONLOCATION` environment variable):
+Create a configuration file `config.json` - it is controlled with `statura.configurationLocation` system properties (or `STATURA_CONFIGURATIONLOCATION` environment variable):
 
 [source,json]
 ----
@@ -65,27 +65,37 @@ Create a configuration file `statura.json` - it is controlled with `statura.conf
 TIP: this is exactly the xref:cli/executor.adoc[executor] CLI options but using a hierarchic (or not) style in a JSON file. The `-` are replaced by `dot` when the JSON is flattened.
 You can see the JSON-Schema at link:jsonschema/jsonschema.json[JSON-Schema,window=_blank].
 
+You can use the maven-exec-plugin to test locally after creating a config.json file at the root base of the project
+
+[source,xml]
+----
+<plugin><!-- mvn exec:java -->
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>exec-maven-plugin</artifactId>
+    <configuration>
+        <mainClass>io.yupiik.fusion.framework.api.main.CliLauncher</mainClass>
+        <arguments>
+            <argument>executor</argument>
+        </arguments>
+        <systemProperties>
+            <property>
+                <key>java.util.logging.manager</key>
+                <value>io.yupiik.logging.jul.YupiikLogManager</value>
+            </property>
+            <property>
+                <key>statura.configurationLocation</key>
+                <value>${project.basedir}/config.json</value>
+            </property>
+        </systemProperties>
+    </configuration>
+</plugin>
+----
+
 Then run:
 
 [source,bash]
 ----
-java -cp target/classes:statura.jar io.yupiik.monitor.SyntheticMonitor monitor config.json
-----
-
-== Build Native Image (GraalVM)
-
-With GraalVM `native-image` tool installed:
-
-[source,bash]
-----
-mvn package -Pnative -DskipTests
-----
-
-Then run the native binary:
-
-[source,bash]
-----
-./target/statura monitor config.json
+mvn exec:java
 ----
 
 == Next Steps
