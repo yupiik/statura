@@ -318,7 +318,7 @@
             ]]>
                     </customHead>
                     <generateIndex>true</generateIndex>
-                    <siteBase>/</siteBase>
+                    <siteBase>/statura</siteBase>
                     <preActions>
                         <preAction>
                             <type>io.yupiik.fusion.documentation.CliDocumentationGenerator</type>
