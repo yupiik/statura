@@ -24,6 +24,7 @@
   <version>1.0.2-SNAPSHOT</version>
   <name>Yupiik Statura</name>
   <description>OTEL synthetic monitoring probe for URL/health checks.</description>
+  <url>https://yupiik.github.io/statura/</url>
 
   <licenses>
     <license>
