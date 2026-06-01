@@ -1,6 +1,8 @@
 = Statura
 
-== Dev tips
+Statura is an observability tool that executes monitoring health checks and sends them to an OpenTelemetry collector.
+
+== Quick Start
 
 To run in minikube:
 
@@ -21,3 +23,54 @@ TIP: UI is accessible using `kubectl port-forward -n otel openobserve 5080:5080`
 
 One way to run the cronjob manually is to use: `k logs -f $(kubectl create job --from=cronjob/statura statura-manual-$(date +%s) | sed 's/ created//' && sleep 2) | yucal`.
 
+== Development
+
+This is a Maven project using Bundlebee for application management. Key commands include:
+
+- `mvn clean install` - Build and install the project
+- `mvn test` - Run tests
+- `mvn compile` - Compile the project
+- `mvn package` - Package the project
+- `mvn verify` - Run verification (build + test + package)
+
+== Project Goals
+
+The primary goal of this project is to ensure observability uptime of applications by:
+
+- Monitoring application health and performance
+- Providing visibility into application behavior
+- Enabling proactive identification and resolution of issues
+- Maintaining application availability and reliability
+
+== Structure
+
+- `src/main/bundlebee/` - Main application code
+- `src/main/bundlebee/kubernetes/` - Kubernetes manifests and configurations
+- `src/main/bundlebee/manifests/` - Bundlebee manifests (statura.json, namespaces.json)
+- `src/main/bundlebee/placeholders/` - Placeholder configurations (dev.checks.json)
+
+== Testing
+
+- `mvn test` - Run all tests
+- Test classes are in `src/test/java/`
+- Tests are grouped by functionality: check tests, Otel tests, etc.
+
+== Deployment
+
+- Kubernetes manifests are in `src/main/bundlebee/kubernetes/`
+- Kubernetes application configurations in `src/main/bundlebee/kubernetes/applications/statura/`
+- Namespace templates in `src/main/bundlebee/kubernetes/_templates/namespace/`
+
+== Environment
+
+- Uses Java 17+
+- Maven-based build system
+- Kubernetes cluster deployment targets
+
+== Special Notes
+
+- The project uses Bundlebee for application management
+- Kubernetes manifests are defined in JSON format
+- Application-specific configurations are in `src/main/bundlebee/kubernetes/applications/statura/`
+- Manifests are defined in `src/main/bundlebee/manifests/`
+- Placeholder configurations are used for development checks
