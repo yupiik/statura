@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>executor</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OTEL synthetic monitoring probe for URL/health checks.">
+    <meta name="author" content="Yupiik Minisite Generator">
+    <meta name="generator" content="Yupiik Minisite Generator">
+    
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i|Montserrat:300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/asciidoctor.js/1.5.5-5/css/asciidoctor.min.css" integrity="sha512-kI7tn5cuEg16kMeXnYmg8rEJPxbxzEM7Gsr191iQdLDevFBLXPCSU9aZWSVuP61tMZWU3nBAR1cJ7SmXnOGLZw==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" integrity="sha512-oc9+XSs1H243/FRN9Rw62Fn8EtxjEYWHXRvjS43YtueEewbS6ObfXcJNyohjHqVKFPoXXUxwc+q1K7Dee6vv9g==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.1/styles/atom-one-dark.min.css" integrity="sha512-Fcqyubi5qOvl+yCwSJ+r7lli+CO1eHXMaugsZrnxuU4DVpLYWXTVoHy55+mCb4VZpMgy7PBhV7IiymC0yu9tkQ==" crossorigin="anonymous" />
+    <style>
+        :root {
+            /* YUPIIK colors (from dark to light) */
+            --yupiik-site-green: #46F72F;
+            --yupiik-site-purple: #D858FF;
+            --yupiik-site-blue-light: #02ABEA;
+            --yupiik-site-blue-dark: #056EBB;
+            --yupiik-site-grey-light: #F4F4F4;
+            --yupiik-site-grey-dark: #212121;
+
+            --yupiik-blue1: var(--yupiik-site-blue-dark);
+            --yupiik-blue2: var(--yupiik-site-blue-dark);
+            --yupiik-blue3: var(--yupiik-site-blue-dark);
+
+            --yupiik-color-white: #fff;
+            --yupiik-color-black: #000;
+
+            --yupiik-color-gray-0: var(--yupiik-color-white);
+            --yupiik-color-gray-100: #f5f6f7;
+            --yupiik-color-gray-200: #ebedf0;
+            --yupiik-color-gray-300: #dadde1;
+            --yupiik-color-gray-400: #ccd0d5;
+            --yupiik-color-gray-500: #bec3c9;
+            --yupiik-color-gray-600: #8d949e;
+            --yupiik-color-gray-700: #606770;
+            --yupiik-color-gray-800: #444950;
+            --yupiik-color-gray-900: #1c1e21;
+            --yupiik-color-gray-1000: var(--yupiik-color-black);
+
+            --yupiik-color-emphasis-0: var(--yupiik-color-gray-0);
+            --yupiik-color-emphasis-100: var(--yupiik-color-gray-100);
+            --yupiik-color-emphasis-200: var(--yupiik-color-gray-200);
+            --yupiik-color-emphasis-300: var(--yupiik-color-gray-300);
+            --yupiik-color-emphasis-400: var(--yupiik-color-gray-400);
+            --yupiik-color-emphasis-500: var(--yupiik-color-gray-500);
+            --yupiik-color-emphasis-600: var(--yupiik-color-gray-600);
+            --yupiik-color-emphasis-700: var(--yupiik-color-gray-700);
+            --yupiik-color-emphasis-800: var(--yupiik-color-gray-800);
+            --yupiik-color-emphasis-900: var(--yupiik-color-gray-900);
+            --yupiik-color-emphasis-1000: var(--yupiik-color-gray-1000);
+            --yupiik-color-content: var(--yupiik-color-emphasis-900);
+
+            --yupiik-font-family-base: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            --yupiik-font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            --yupiik-font-size-base: 100%;
+
+            --yupiik-font-weight-light: 300;
+            --yupiik-font-weight-normal: 400;
+            --yupiik-font-weight-semibold: 500;
+            --yupiik-font-weight-bold: 700;
+
+            --yupiik-font-weight-base: var(--yupiik-font-weight-normal);
+            --yupiik-line-height-base: 1.65;
+            --yupiik-font-weight-light: 300;
+            --yupiik-font-weight-normal: 400;
+            --yupiik-font-weight-semibold: 500;
+            --yupiik-font-weight-bold: 700;
+
+            --yupiik-font-weight-base: var(--yupiik-font-weight-normal);
+            --yupiik-line-height-base: 1.65;
+
+            --yupiik-global-spacing: 1rem;
+            --yupiik-spacing-vertical: var(--yupiik-global-spacing);
+            --yupiik-spacing-horizontal: var(--yupiik-global-spacing);
+
+            --yupiik-h1-font-size: 2rem;
+            --yupiik-h2-font-size: 1.5rem;
+            --yupiik-h3-font-size: 1.25rem;
+            --yupiik-h4-font-size: 1rem;
+            --yupiik-h5-font-size: 0.875rem;
+            --yupiik-h6-font-size: 0.85rem;
+
+            --yupiik-heading-color: var(--yupiik-blue1);
+            --yupiik-heading-margin-top: 0;
+            --yupiik-heading-margin-bottom: var(--yupiik-spacing-vertical);
+            --yupiik-heading-font-family: var(--yupiik-font-family-base);
+            --yupiik-heading-font-weight: var(--yupiik-font-weight-bold);
+            --yupiik-heading-line-height: 1.25;
+        }
+    </style>
+    [
+            <style>
+                #configuration-html-container .sect2 .tableblock {
+                  width: 100%;
+                  table-layout: fixed;
+                }
+            </style>
+    <link id="theme-style" rel="stylesheet" href="/css/theme.css?v=1.0.2-SNAPSHOT">
+</head>
+<body>
+    <header class="header fixed-top">
+        <div class="branding docs-branding">
+            <div class="container-fluid position-relative py-2">
+                <div class="docs-logo-wrapper">
+	                <div class="site-logo"><a title="Home" class="navbar-brand" href="/index.html">
+	                <img class="logo-icon mr-2" src="/images/logo.svg" alt="logo">
+	                <span class="logo-text">Yupiik Statura <span class="text-alt">Documentation</span></span></a></div>
+                </div>
+	            <div class="docs-top-utilities d-flex justify-content-end align-items-center">
+					
+					<li class="list-inline-item"><a title="Search" id="search-button" href="#" data-toggle="modal" data-target="#searchModal"><i data-toggle="tooltip" data-placement="top" title="Search" class="fas fa-search"></i></a></li>
+
+					<ul class="social-list list-inline mx-md-3 mx-lg-5 mb-0 d-none d-lg-flex">
+						
+						<li class="list-inline-item"><a title="Github" href="https://www.github.com/yupiik/"><i class="fab fa-github fa-fw"></i></a></li><li class="list-inline-item"><a title="LinkedIn" href="https://www.linkedin.com/company/yupiik/"><i class="fab fa-linkedin fa-fw"></i></a></li>
+		            </ul>
+	            </div>
+            </div>
+        </div>
+    </header>
+	<div class="page">
+        <div class="page-navigation-left">
+            <h3>Menu</h3>
+            <ul>
+                <li>
+                    <a title="Getting Started" href="/getting-started.html">
+                        <i class="fas fa-play"></i>Getting Started
+                    </a>
+                </li>                <li>
+                    <a title="Deployment" href="/deployment.html">
+                        <i class="fas fa-rocket"></i>Deployment
+                    </a>
+                </li>                <li>
+                    <a title="BundleBee Deployment" href="/bundlebee.html">
+                        <i class="fas fa-space-shuttle"></i>BundleBee
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div id="cli-executor-html-container" class="container page-content cli-executor-html ">
+                        <div class="page-header">
+                <h1>executor</h1>
+            </div>
+            <div class="page-content-body">
+                <div class="sect1" id="_description">
+  <h2>Description</h2>
+ <div class="sectionbody">
+ <div class="paragraph">
+ <p>
+Run synthetic checks against configured URLs and push OTEL metrics.
+ </p>
+ </div>
+ </div>
+ </div>
+ <div class="sect1" id="_synopsis">
+  <h2>Synopsis</h2>
+ <div class="sectionbody">
+ <div class="listingblock">
+ <div class="content">
+ <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">java ... io.yupiik.fusion.framework.api.main.Launcher \
+    executor \
+    --checks-$index-connection-host ...\
+    --checks-$index-connection-port ...\
+    --checks-$index-connection-proxy-host ...\
+    --checks-$index-connection-proxy-port ...\
+    --checks-$index-connection-proxy-type ...\
+    --checks-$index-connection-timeout ...\
+    --checks-$index-dns-expectedAddresses ...\
+    --checks-$index-dns-hostname ...\
+    --checks-$index-dns-timeout ...\
+    --checks-$index-http-assertions-$index-expected-value ...\
+    --checks-$index-http-assertions-$index-json-pointer ...\
+    --checks-$index-http-assertions-$index-operator ...\
+    --checks-$index-http-body ...\
+    --checks-$index-http-expected-status ...\
+    --checks-$index-http-followRedirects ...\
+    --checks-$index-http-headers ...\
+    --checks-$index-http-method ...\
+    --checks-$index-http-ssl-certificates ...\
+    --checks-$index-http-ssl-client-certificate ...\
+    --checks-$index-http-ssl-client-private-key ...\
+    --checks-$index-http-timeout ...\
+    --checks-$index-http-url ...\
+    --checks-$index-http-version ...\
+    --checks-$index-jdbc-driver ...\
+    --checks-$index-jdbc-password ...\
+    --checks-$index-jdbc-timeout ...\
+    --checks-$index-jdbc-url ...\
+    --checks-$index-jdbc-username ...\
+    --checks-$index-jdbc-validation-query ...\
+    --checks-$index-name ...\
+    --checks-$index-type ...\
+    --checks-$index-x509-allow-self-signed ...\
+    --checks-$index-x509-expected-fingerprint ...\
+    --checks-$index-x509-expected-issuer ...\
+    --checks-$index-x509-expected-sans ...\
+    --checks-$index-x509-expected-subject ...\
+    --checks-$index-x509-host ...\
+    --checks-$index-x509-min-days-until-expiration ...\
+    --checks-$index-x509-port ...\
+    --checks-$index-x509-sni ...\
+    --checks-$index-x509-timeout ...\
+    --checks-$index-x509-verify-hostname ...\
+    --default-timeout ...\
+    --execution-timeout ...\
+    --max-concurrent-per-type ...\
+    --opentelemetry-endpoint ...\
+    --opentelemetry-headers ...\
+    --opentelemetry-httpVersion ...\
+    --opentelemetry-protocol ...\
+    --opentelemetry-resource-attributes ...\
+    --opentelemetry-scope-attributes ...\
+    --opentelemetry-ssl-certificates ...\
+    --opentelemetry-ssl-client-certificate ...\
+    --opentelemetry-ssl-client-private-key ...\
+    --thread-per-type ...</code></pre>
+ </div>
+ </div>
+ </div>
+ </div>
+ <div class="sect1" id="_parameters">
+  <h2>Parameters</h2>
+ <div class="sectionbody">
+ <dl>
+  <dt>--checks-$index-connection-host</dt>
+  <dd>
+Host to connect to.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-connection-port</dt>
+  <dd>
+Port to connect to.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-connection-proxy-host</dt>
+  <dd>
+Proxy host.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-connection-proxy-port</dt>
+  <dd>
+Proxy port.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-connection-proxy-type</dt>
+  <dd>
+Proxy type: HTTP, SOCKS (SOCKS5), SOCKS4 (or SOCKS4a), or DIRECT.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-connection-timeout</dt>
+  <dd>
+Custom (java duration formatted) timeout for this check.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-dns-expectedAddresses</dt>
+  <dd>
+Optional list of expected resolved IP addresses.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-dns-hostname</dt>
+  <dd>
+Hostname to resolve.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-dns-timeout</dt>
+  <dd>
+Custom (java duration formatted) timeout for this check.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-assertions-$index-expected-value</dt>
+  <dd>
+Expected value</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-assertions-$index-json-pointer</dt>
+  <dd>
+JSON-Pointer to extract.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-assertions-$index-operator</dt>
+  <dd>
+Expected value</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-body</dt>
+  <dd>
+ <div class="paragraph">
+ <p>For <i>write</i> methods, the payload to send.</p>
+ </div>
+</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-expected-status</dt>
+  <dd>
+Expected response status.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-followRedirects</dt>
+  <dd>
+Should redirects be followed.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-headers</dt>
+  <dd>
+HTTP headers to set.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-method</dt>
+  <dd>
+HTTP method to use.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-ssl-certificates</dt>
+  <dd>
+Trusted CA certificates in PEM format for custom SSL trust.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-ssl-client-certificate</dt>
+  <dd>
+Client certificate in PEM format for mTLS.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-ssl-client-private-key</dt>
+  <dd>
+Client private key in PEM format (PKCS#8) for mTLS.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-timeout</dt>
+  <dd>
+Custom (java duration formatted) timeout for this check.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-url</dt>
+  <dd>
+URL to call.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-http-version</dt>
+  <dd>
+HTTP protocol version.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-jdbc-driver</dt>
+  <dd>
+JDBC driver (if needed, recent drivers can be loaded from the classpath).</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-jdbc-password</dt>
+  <dd>
+JDBC password, prefer using secret injection for this.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-jdbc-timeout</dt>
+  <dd>
+Custom (java duration formatted) timeout for this check.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-jdbc-url</dt>
+  <dd>
+JDBC URL.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-jdbc-username</dt>
+  <dd>
+JDBC username.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-jdbc-validation-query</dt>
+  <dd>
+SQL query to validate the connection.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-name</dt>
+  <dd>
+Check name (or an internal one is generated).</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-type</dt>
+  <dd>
+Type of the validation.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-allow-self-signed</dt>
+  <dd>
+Whether to accept self-signed certificates.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-expected-fingerprint</dt>
+  <dd>
+Expected SHA-256 fingerprint (hex, colon-separated or continuous).</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-expected-issuer</dt>
+  <dd>
+Expected Issuer DN regex pattern.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-expected-sans</dt>
+  <dd>
+Expected Subject Alternative Names.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-expected-subject</dt>
+  <dd>
+Expected Subject DN regex pattern.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-host</dt>
+  <dd>
+Hostname to connect to.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-min-days-until-expiration</dt>
+  <dd>
+Minimum days before certificate expiration.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-port</dt>
+  <dd>
+Port to connect to.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-sni</dt>
+  <dd>
+ <div class="paragraph">
+ <p>SNI hostname (defaults to <code>host</code>).</p>
+ </div>
+</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-timeout</dt>
+  <dd>
+Custom (java duration formatted) timeout for this check.</dd>
+ </dl>
+ <dl>
+  <dt>--checks-$index-x509-verify-hostname</dt>
+  <dd>
+Verify hostname matches certificate SAN/CN.</dd>
+ </dl>
+ <dl>
+  <dt>--default-timeout</dt>
+  <dd>
+Default timeout per check.</dd>
+ </dl>
+ <dl>
+  <dt>--execution-timeout</dt>
+  <dd>
+Default timeout for the whole execution.</dd>
+ </dl>
+ <dl>
+  <dt>--max-concurrent-per-type</dt>
+  <dd>
+Max parallel checks per type.</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-endpoint</dt>
+  <dd>
+OpenTelemetry collector HTTP endpoint for metrics.</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-headers</dt>
+  <dd>
+Headers to send to respect OpenTelemetry collector endpoint.</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-httpVersion</dt>
+  <dd>
+HTTP protocol version for the collector connection.</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-protocol</dt>
+  <dd>
+Serialization protocol: JSON or PROTOBUF.</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-resource-attributes</dt>
+  <dd>
+Resource attributes (e.g. service.name, service.version).</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-scope-attributes</dt>
+  <dd>
+Instrumentation scope attributes (e.g. name, version).</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-ssl-certificates</dt>
+  <dd>
+Trusted CA certificates in PEM format for custom SSL trust.</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-ssl-client-certificate</dt>
+  <dd>
+Client certificate in PEM format for mTLS.</dd>
+ </dl>
+ <dl>
+  <dt>--opentelemetry-ssl-client-private-key</dt>
+  <dd>
+Client private key in PEM format (PKCS#8) for mTLS.</dd>
+ </dl>
+ <dl>
+  <dt>--thread-per-type</dt>
+  <dd>
+Thread mode: &lt;0 synchronous, 0 virtual threads, &gt;0 fixed pool size.</dd>
+ </dl>
+ </div>
+ </div>
+                
+                <nav class="page-footer-nav" aria-label="Docs pages">
+    <a href="index.html" class="page-footer-nav-link-prev">
+    <div>Previous</div>
+    <div>CLI</div>
+</a>
+    
+</nav>
+            </div>
+        </div>
+    <div class="page-navigation-right">
+        <h3>Navigation</h3>
+        <nav class="generated-nav-menu"></nav>
+    </div>
+    </div>
+    <footer class="footer pb-5">
+	    <div class="text-center">
+		    <ul class="social-list list-unstyled">
+                <li class="list-inline-item"><a title="Github" href="https://www.github.com/yupiik/"><i class="fab fa-github fa-fw"></i></a></li><li class="list-inline-item"><a title="LinkedIn" href="https://www.linkedin.com/company/yupiik/"><i class="fab fa-linkedin fa-fw"></i></a></li>
+	        </ul>
+            <small class="copyright">© 2026</small> | <a href="https://www.yupiik.com/terms-of-use/">Terms of use</a> | <a href="https://www.yupiik.com/privacy-policy/">Privacy policy</a>
+	    </div>
+    </footer>
+
+    <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="searchModalLabel">Search</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="return false;" class="form-inline">
+          <div class="form-group">
+            <label for="searchInput"><b>Search: </b></label>
+            <input class="form-control" id="searchInput" placeholder="Enter search text and hit enter...">
+          </div>
+        </form>
+        <div class="search-hits"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" ></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.min.js" integrity="sha512-8qmis31OQi6hIRgvkht0s6mCOittjMa9GMqtK9hes5iEQBQE/Ca6yGE5FsW36vyipGoWQswBj/QBm2JR086Rkw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.1/highlight.min.js" integrity="sha512-d00ajEME7cZhepRqSIVsQVGDJBdZlfHyQLNC6tZXYKTG7iwcF8nhlFuppanz8hYgXr8VvlfKh4gLC25ud3c90A==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.1/languages/bash.min.js" integrity="sha512-Hg0ufGEvn0AuzKMU0psJ1iH238iUN6THh7EI0CfA0n1sd3yu6PYet4SaDMpgzN9L1yQHxfB3yc5ezw3PwolIfA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.1/languages/bash.min.js" integrity="sha512-Hg0ufGEvn0AuzKMU0psJ1iH238iUN6THh7EI0CfA0n1sd3yu6PYet4SaDMpgzN9L1yQHxfB3yc5ezw3PwolIfA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.1/languages/json.min.js" integrity="sha512-37sW1XqaJmseHAGNg4N4Y01u6g2do6LZL8tsziiL5CMXGy04Th65OXROw2jeDeXLo5+4Fsx7pmhEJJw77htBFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.1/languages/dockerfile.min.js" integrity="sha512-eRNl3ty7GOJPBN53nxLgtSSj2rkYj5/W0Vg0MFQBw8xAoILeT6byOogENHHCRRvHil4pKQ/HbgeJ5DOwQK3SJA==" crossorigin="anonymous"></script>
+    <script>if (!(window.minisite || {}).skipHighlightJs) { hljs.highlightAll();
+function addCopyButtons(clipboard) {
+  document.querySelectorAll('pre > code').forEach(function (codeBlock) {
+  var button = document.createElement('button');  button.className = 'copy-code-button';  button.type = 'button';  button.innerText = 'Copy';  button.addEventListener('click', function () {   clipboard.writeText(codeBlock.innerText).then(function () {   button.blur();   button.innerText = 'Copied!';   setTimeout(function () { button.innerText = 'Copy'; }, 2000); }, function (error) { button.innerText = 'Error'; });  });  var pre = codeBlock.parentNode;  if (pre.parentNode.classList.contains('highlight')) {   var highlight = pre.parentNode; highlight.parentNode.insertBefore(button, highlight);  } else { pre.parentNode.insertBefore(button, pre); } });}
+if (navigator && navigator.clipboard) { addCopyButtons(navigator.clipboard);} else { var script = document.createElement('script'); script.src = '//cdnjs.cloudflare.com/ajax/libs/clipboard-polyfill/2.7.0/clipboard-polyfill.promise.js'; script.integrity = 'sha256-waClS2re9NUbXRsryKoof+F9qc1gjjIhc2eT7ZbIv94='; script.crossOrigin = 'anonymous'; script.onload = function() {addCopyButtons(clipboard);}; document.body.appendChild(script);} }</script>
+    <script src="/js/minisite.js?v=1.0.2-SNAPSHOT"></script>
+    <script>$('.page-content-body').generatedNavMenu();</script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.3/fuse.min.js" integrity="sha512-neoBxVNv0UMXjoilAYGxfWrSsW6iAVclx7vQKdPJ9Peet1bM5YQjU0aIB8LtH8iNPa+pAyMZprBBw2ZQ/Q1LjQ==" crossorigin="anonymous"></script>
+
+</body>
+</html>

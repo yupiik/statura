@@ -1,0 +1,413 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Statura Configuration",
+  "type": "object",
+  "properties": {
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/io.yupiik.statura.CheckExecutor.CheckConfig"
+      },
+      "description": "List of validations to do.",
+      "default": []
+    },
+    "default-timeout": {
+      "type": "string",
+      "description": "Default timeout per check.",
+      "default": "PT30S"
+    },
+    "execution-timeout": {
+      "type": "string",
+      "description": "Default timeout for the whole execution.",
+      "default": "PT15M"
+    },
+    "max-concurrent-per-type": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Max parallel checks per type. Use {\"$asList\": true, ...} for Map entries serialization.",
+      "default": {}
+    },
+    "opentelemetry": {
+      "$ref": "#/$defs/io.yupiik.statura.otel.OpenTelemetry"
+    },
+    "thread-per-type": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Thread mode: <0 synchronous, 0 virtual threads, >0 fixed pool size. Use {\"$asList\": true, ...} for Map entries serialization.",
+      "default": "java.util.Map.of(io.yupiik.statura.CheckExecutor.CheckType.JDBC.name(), \"8\")"
+    }
+  },
+  "$defs": {
+    "io.yupiik.statura.check.ConnectionCheckConfiguration.Proxy": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Proxy host."
+        },
+        "port": {
+          "type": "integer",
+          "description": "Proxy port.",
+          "default": 0
+        },
+        "type": {
+          "type": "string",
+          "description": "Proxy type: HTTP, SOCKS (SOCKS5), SOCKS4 (or SOCKS4a), or DIRECT.",
+          "default": "DIRECT"
+        }
+      },
+      "description": "Optional proxy configuration."
+    },
+    "io.yupiik.statura.check.ConnectionCheckConfiguration": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Host to connect to."
+        },
+        "port": {
+          "type": "integer",
+          "description": "Port to connect to.",
+          "default": 0
+        },
+        "proxy": {
+          "$ref": "#/$defs/io.yupiik.statura.check.ConnectionCheckConfiguration.Proxy"
+        },
+        "timeout": {
+          "type": "string",
+          "description": "Custom (java duration formatted) timeout for this check.",
+          "default": "PT10S"
+        }
+      },
+      "description": "When type==CONNECTION, the configuration of the connection check to do."
+    },
+    "io.yupiik.statura.check.DnsCheckConfiguration": {
+      "type": "object",
+      "properties": {
+        "expectedAddresses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional list of expected resolved IP addresses."
+        },
+        "hostname": {
+          "type": "string",
+          "description": "Hostname to resolve."
+        },
+        "timeout": {
+          "type": "string",
+          "description": "Custom (java duration formatted) timeout for this check.",
+          "default": "PT10S"
+        }
+      },
+      "description": "When type==DNS, the configuration of the DNS check to do."
+    },
+    "io.yupiik.statura.check.HttpCheckConfiguration.AssertionOperator": {
+      "type": "string",
+      "enum": [
+          "EXISTS",
+          "EQUALS",
+          "GTE",
+          "LTE",
+          "GT",
+          "LT"
+        ],
+      "description": "Expected value",
+      "default": "EXISTS"
+    },
+    "io.yupiik.statura.check.HttpCheckConfiguration.Assertion": {
+      "type": "object",
+      "properties": {
+        "expected-value": {
+          "type": "string",
+          "description": "Expected value",
+          "default": "true"
+        },
+        "json-pointer": {
+          "type": "string",
+          "description": "JSON-Pointer to extract.",
+          "default": "/"
+        },
+        "operator": {
+          "$ref": "#/$defs/io.yupiik.statura.check.HttpCheckConfiguration.AssertionOperator"
+        }
+      }
+    },
+    "java.net.http.HttpClient.Version": {
+      "type": "string",
+      "enum": [
+          "HTTP_1_1",
+          "HTTP_2"
+        ],
+      "description": "HTTP protocol version.",
+      "default": "HTTP_1_1"
+    },
+    "io.yupiik.statura.check.HttpCheckConfiguration": {
+      "type": "object",
+      "properties": {
+        "assertions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/io.yupiik.statura.check.HttpCheckConfiguration.Assertion"
+          },
+          "description": "For JSON responses, some validations on the response payload..",
+          "default": []
+        },
+        "body": {
+          "type": "string",
+          "description": "For _write_ methods, the payload to send.",
+          "default": ""
+        },
+        "expected-status": {
+          "type": "integer",
+          "description": "Expected response status.",
+          "default": 200
+        },
+        "followRedirects": {
+          "type": "boolean",
+          "description": "Should redirects be followed.",
+          "default": false
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "HTTP headers to set. Use {\"$asList\": true, ...} for Map entries serialization.",
+          "default": {}
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP method to use.",
+          "default": "GET"
+        },
+        "ssl-certificates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Trusted CA certificates in PEM format for custom SSL trust."
+        },
+        "ssl-client-certificate": {
+          "type": "string",
+          "description": "Client certificate in PEM format for mTLS."
+        },
+        "ssl-client-private-key": {
+          "type": "string",
+          "description": "Client private key in PEM format (PKCS#8) for mTLS."
+        },
+        "timeout": {
+          "type": "string",
+          "description": "Custom (java duration formatted) timeout for this check.",
+          "default": "PT30S"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to call."
+        },
+        "version": {
+          "$ref": "#/$defs/java.net.http.HttpClient.Version"
+        }
+      },
+      "description": "When type==HTTP, the configuration of the check to do."
+    },
+    "io.yupiik.statura.check.JdbcCheckConfiguration": {
+      "type": "object",
+      "properties": {
+        "driver": {
+          "type": "string",
+          "description": "JDBC driver (if needed, recent drivers can be loaded from the classpath)."
+        },
+        "password": {
+          "type": "string",
+          "description": "JDBC password, prefer using secret injection for this."
+        },
+        "timeout": {
+          "type": "string",
+          "description": "Custom (java duration formatted) timeout for this check.",
+          "default": "PT30S"
+        },
+        "url": {
+          "type": "string",
+          "description": "JDBC URL."
+        },
+        "username": {
+          "type": "string",
+          "description": "JDBC username."
+        },
+        "validation-query": {
+          "type": "string",
+          "description": "SQL query to validate the connection.",
+          "default": "SELECT 1"
+        }
+      },
+      "description": "When type==JDBC, the configuration of the JDBC check to do."
+    },
+    "io.yupiik.statura.CheckExecutor.CheckType": {
+      "type": "string",
+      "enum": [
+          "HTTP",
+          "CONNECTION",
+          "JDBC",
+          "DNS",
+          "X509"
+        ],
+      "description": "Type of the validation.",
+      "default": "HTTP"
+    },
+    "io.yupiik.statura.check.X509CheckConfiguration": {
+      "type": "object",
+      "properties": {
+        "allow-self-signed": {
+          "type": "boolean",
+          "description": "Whether to accept self-signed certificates.",
+          "default": false
+        },
+        "expected-fingerprint": {
+          "type": "string",
+          "description": "Expected SHA-256 fingerprint (hex, colon-separated or continuous)."
+        },
+        "expected-issuer": {
+          "type": "string",
+          "description": "Expected Issuer DN regex pattern."
+        },
+        "expected-sans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Expected Subject Alternative Names."
+        },
+        "expected-subject": {
+          "type": "string",
+          "description": "Expected Subject DN regex pattern."
+        },
+        "host": {
+          "type": "string",
+          "description": "Hostname to connect to."
+        },
+        "min-days-until-expiration": {
+          "type": "integer",
+          "description": "Minimum days before certificate expiration.",
+          "default": 0
+        },
+        "port": {
+          "type": "integer",
+          "description": "Port to connect to.",
+          "default": 443
+        },
+        "sni": {
+          "type": "string",
+          "description": "SNI hostname (defaults to `host`)."
+        },
+        "timeout": {
+          "type": "string",
+          "description": "Custom (java duration formatted) timeout for this check.",
+          "default": "PT30S"
+        },
+        "verify-hostname": {
+          "type": "boolean",
+          "description": "Verify hostname matches certificate SAN/CN.",
+          "default": true
+        }
+      },
+      "description": "When type==X509, the configuration of the X509 certificate check to do."
+    },
+    "io.yupiik.statura.CheckExecutor.CheckConfig": {
+      "type": "object",
+      "properties": {
+        "connection": {
+          "$ref": "#/$defs/io.yupiik.statura.check.ConnectionCheckConfiguration"
+        },
+        "dns": {
+          "$ref": "#/$defs/io.yupiik.statura.check.DnsCheckConfiguration"
+        },
+        "http": {
+          "$ref": "#/$defs/io.yupiik.statura.check.HttpCheckConfiguration"
+        },
+        "jdbc": {
+          "$ref": "#/$defs/io.yupiik.statura.check.JdbcCheckConfiguration"
+        },
+        "name": {
+          "type": "string",
+          "description": "Check name (or an internal one is generated)."
+        },
+        "type": {
+          "$ref": "#/$defs/io.yupiik.statura.CheckExecutor.CheckType"
+        },
+        "x509": {
+          "$ref": "#/$defs/io.yupiik.statura.check.X509CheckConfiguration"
+        }
+      }
+    },
+    "io.yupiik.statura.otel.OpenTelemetry.Protocol": {
+      "type": "string",
+      "enum": [
+          "JSON",
+          "PROTOBUF"
+        ],
+      "description": "Serialization protocol: JSON or PROTOBUF.",
+      "default": "JSON"
+    },
+    "io.yupiik.statura.otel.OpenTelemetry": {
+      "type": "object",
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "description": "OpenTelemetry collector HTTP endpoint for metrics."
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Headers to send to respect OpenTelemetry collector endpoint. Use {\"$asList\": true, ...} for Map entries serialization.",
+          "default": {}
+        },
+        "httpVersion": {
+          "$ref": "#/$defs/java.net.http.HttpClient.Version"
+        },
+        "protocol": {
+          "$ref": "#/$defs/io.yupiik.statura.otel.OpenTelemetry.Protocol"
+        },
+        "resource-attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Resource attributes (e.g. service.name, service.version). Use {\"$asList\": true, ...} for Map entries serialization.",
+          "default": "java.util.Map.of(\"service.name\", \"statura\", \"service.version\", \"1.0\")"
+        },
+        "scope-attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Instrumentation scope attributes (e.g. name, version). Use {\"$asList\": true, ...} for Map entries serialization.",
+          "default": "java.util.Map.of(\"name\", \"statura\", \"version\", \"1.0\")"
+        },
+        "ssl-certificates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Trusted CA certificates in PEM format for custom SSL trust."
+        },
+        "ssl-client-certificate": {
+          "type": "string",
+          "description": "Client certificate in PEM format for mTLS."
+        },
+        "ssl-client-private-key": {
+          "type": "string",
+          "description": "Client private key in PEM format (PKCS#8) for mTLS."
+        }
+      },
+      "description": "OpenTelemetry configuration."
+    }
+  }
+}
