@@ -29,6 +29,7 @@ import java.net.http.HttpRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -93,6 +94,7 @@ public class OtlpMetricsFlusher {
                                                                             ? Stream.empty()
                                                                             // note we would prefer a low cardinality error but for this particular app it should be ok
                                                                             : Stream.of(check.errorMessage())
+                                                                            .filter(Objects::nonNull)
                                                                             .flatMap(error -> Stream.of(
                                                                                     attr("error.message", error))),
                                                                     check.metadata().entrySet().stream()
