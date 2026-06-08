@@ -22,22 +22,16 @@
       "default": "PT15M"
     },
     "max-concurrent-per-type": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      },
-      "description": "Max parallel checks per type. Use {\"$asList\": true, ...} for Map entries serialization.",
-      "default": {}
+      "type": "string",
+      "description": "Max parallel checks per type. Use key=value syntax, one per line.",
+      "default": ""
     },
     "opentelemetry": {
       "$ref": "#/$defs/io.yupiik.statura.otel.OpenTelemetry"
     },
     "thread-per-type": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      },
-      "description": "Thread mode: <0 synchronous, 0 virtual threads, >0 fixed pool size. Use {\"$asList\": true, ...} for Map entries serialization.",
+      "type": "string",
+      "description": "Thread mode: <0 synchronous, 0 virtual threads, >0 fixed pool size. Use key=value syntax, one per line.",
       "default": "java.util.Map.of(io.yupiik.statura.CheckExecutor.CheckType.JDBC.name(), \"8\")"
     }
   },
@@ -174,12 +168,9 @@
           "default": false
         },
         "headers": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "HTTP headers to set. Use {\"$asList\": true, ...} for Map entries serialization.",
-          "default": {}
+          "type": "string",
+          "description": "HTTP headers to set. Use key=value syntax, one per line.",
+          "default": ""
         },
         "method": {
           "type": "string",
@@ -321,6 +312,11 @@
     "io.yupiik.statura.CheckExecutor.CheckConfig": {
       "type": "object",
       "properties": {
+        "attributes": {
+          "type": "string",
+          "description": "Check custom attributes. Use key=value syntax, one per line.",
+          "default": ""
+        },
         "connection": {
           "$ref": "#/$defs/io.yupiik.statura.check.ConnectionCheckConfiguration"
         },
@@ -345,6 +341,17 @@
         }
       }
     },
+    "io.yupiik.statura.otel.OpenTelemetry.AttributeFlattening": {
+      "type": "string",
+      "enum": [
+          "NONE",
+          "ALL",
+          "RESOURCE",
+          "SCOPE"
+        ],
+      "description": "Should resource and/or scope attributes be merged with metrics attributes. Mainly useful when prometheus is not configured to handle global attributes.",
+      "default": "NONE"
+    },
     "io.yupiik.statura.otel.OpenTelemetry.Protocol": {
       "type": "string",
       "enum": [
@@ -361,13 +368,13 @@
           "type": "string",
           "description": "OpenTelemetry collector HTTP endpoint for metrics."
         },
+        "flatten-attributes": {
+          "$ref": "#/$defs/io.yupiik.statura.otel.OpenTelemetry.AttributeFlattening"
+        },
         "headers": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Headers to send to respect OpenTelemetry collector endpoint. Use {\"$asList\": true, ...} for Map entries serialization.",
-          "default": {}
+          "type": "string",
+          "description": "Headers to send to respect OpenTelemetry collector endpoint. Use key=value syntax, one per line.",
+          "default": ""
         },
         "httpVersion": {
           "$ref": "#/$defs/java.net.http.HttpClient.Version"
@@ -376,19 +383,13 @@
           "$ref": "#/$defs/io.yupiik.statura.otel.OpenTelemetry.Protocol"
         },
         "resource-attributes": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Resource attributes (e.g. service.name, service.version). Use {\"$asList\": true, ...} for Map entries serialization.",
+          "type": "string",
+          "description": "Resource attributes (e.g. service.name, service.version). Use key=value syntax, one per line.",
           "default": "java.util.Map.of(\"service.name\", \"statura\", \"service.version\", \"1.0\")"
         },
         "scope-attributes": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Instrumentation scope attributes (e.g. name, version). Use {\"$asList\": true, ...} for Map entries serialization.",
+          "type": "string",
+          "description": "Instrumentation scope attributes (e.g. name, version). Use key=value syntax, one per line.",
           "default": "java.util.Map.of(\"name\", \"statura\", \"version\", \"1.0\")"
         },
         "ssl-certificates": {

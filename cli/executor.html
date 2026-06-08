@@ -104,7 +104,7 @@
                   table-layout: fixed;
                 }
             </style>
-    <link id="theme-style" rel="stylesheet" href="/statura/css/theme.css?v=1.0.2-SNAPSHOT">
+    <link id="theme-style" rel="stylesheet" href="/statura/css/theme.css?v=1.0.3-SNAPSHOT">
 </head>
 <body>
     <header class="header fixed-top">
@@ -169,6 +169,7 @@ Run synthetic checks against configured URLs and push OTEL metrics.
  <div class="content">
  <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">java ... io.yupiik.fusion.framework.api.main.Launcher \
     executor \
+    --checks-$index-attributes ...\
     --checks-$index-connection-host ...\
     --checks-$index-connection-port ...\
     --checks-$index-connection-proxy-host ...\
@@ -215,6 +216,7 @@ Run synthetic checks against configured URLs and push OTEL metrics.
     --execution-timeout ...\
     --max-concurrent-per-type ...\
     --opentelemetry-endpoint ...\
+    --opentelemetry-flatten-attributes ...\
     --opentelemetry-headers ...\
     --opentelemetry-httpVersion ...\
     --opentelemetry-protocol ...\
@@ -231,6 +233,11 @@ Run synthetic checks against configured URLs and push OTEL metrics.
  <div class="sect1" id="_parameters">
   <h2>Parameters</h2>
  <div class="sectionbody">
+ <dl>
+  <dt>--checks-$index-attributes</dt>
+  <dd>
+Check custom attributes.</dd>
+ </dl>
  <dl>
   <dt>--checks-$index-connection-host</dt>
   <dd>
@@ -468,6 +475,11 @@ Max parallel checks per type.</dd>
 OpenTelemetry collector HTTP endpoint for metrics.</dd>
  </dl>
  <dl>
+  <dt>--opentelemetry-flatten-attributes</dt>
+  <dd>
+Should resource and/or scope attributes be merged with metrics attributes. Mainly useful when prometheus is not configured to handle global attributes.</dd>
+ </dl>
+ <dl>
   <dt>--opentelemetry-headers</dt>
   <dd>
 Headers to send to respect OpenTelemetry collector endpoint.</dd>
@@ -576,7 +588,7 @@ function addCopyButtons(clipboard) {
   document.querySelectorAll('pre > code').forEach(function (codeBlock) {
   var button = document.createElement('button');  button.className = 'copy-code-button';  button.type = 'button';  button.innerText = 'Copy';  button.addEventListener('click', function () {   clipboard.writeText(codeBlock.innerText).then(function () {   button.blur();   button.innerText = 'Copied!';   setTimeout(function () { button.innerText = 'Copy'; }, 2000); }, function (error) { button.innerText = 'Error'; });  });  var pre = codeBlock.parentNode;  if (pre.parentNode.classList.contains('highlight')) {   var highlight = pre.parentNode; highlight.parentNode.insertBefore(button, highlight);  } else { pre.parentNode.insertBefore(button, pre); } });}
 if (navigator && navigator.clipboard) { addCopyButtons(navigator.clipboard);} else { var script = document.createElement('script'); script.src = '//cdnjs.cloudflare.com/ajax/libs/clipboard-polyfill/2.7.0/clipboard-polyfill.promise.js'; script.integrity = 'sha256-waClS2re9NUbXRsryKoof+F9qc1gjjIhc2eT7ZbIv94='; script.crossOrigin = 'anonymous'; script.onload = function() {addCopyButtons(clipboard);}; document.body.appendChild(script);} }</script>
-    <script src="/statura/js/minisite.js?v=1.0.2-SNAPSHOT"></script>
+    <script src="/statura/js/minisite.js?v=1.0.3-SNAPSHOT"></script>
     <script>$('.page-content-body').generatedNavMenu();</script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.3/fuse.min.js" integrity="sha512-neoBxVNv0UMXjoilAYGxfWrSsW6iAVclx7vQKdPJ9Peet1bM5YQjU0aIB8LtH8iNPa+pAyMZprBBw2ZQ/Q1LjQ==" crossorigin="anonymous"></script>
