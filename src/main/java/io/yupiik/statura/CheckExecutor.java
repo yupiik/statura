@@ -50,10 +50,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static io.yupiik.statura.CheckExecutor.CheckType.JDBC;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.stream.Collectors.toMap;
 
 @DefaultScoped
 @Command(name = "executor", description = "Run synthetic checks against configured URLs and push OTEL metrics.")
@@ -166,7 +168,14 @@ public class CheckExecutor implements Runnable {
             case X509 -> x509Check.check(defaultExecutor, it.name(), it.x509());
         }).thenApplyAsync(res -> {
             logger.info(() -> "Executed '" + it.name() + "' (type=" + it.type() + "): success=" + res.success() + (res.errorMessage() != null ? ", error=\"" + res.errorMessage() + "\"" : ""));
-            return res;
+            return it.attributes().isEmpty() ?
+                    res :
+                    new CheckResult(
+                            res.name(),
+                            Stream.of(res.metadata(), it.attributes())
+                                    .flatMap(e -> e.entrySet().stream())
+                                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a)),
+                            res.durationMs(), res.timestampNanos(), res.success(), res.errorMessage());
         }, defaultExecutor);
     }
 
@@ -223,6 +232,9 @@ public class CheckExecutor implements Runnable {
     public record CheckConfig(
             @Property(documentation = "Check name (or an internal one is generated).")
             String name,
+
+            @Property(documentation = "Check custom attributes.", defaultValue = "java.util.Map.of()")
+            Map<String, String> attributes,
 
             @Property(documentation = "Type of the validation.", defaultValue = "io.yupiik.statura.CheckExecutor.CheckType.HTTP")
             CheckType type,

@@ -24,6 +24,7 @@ import io.yupiik.statura.otel.OtlpMetricsFlusher;
 import io.yupiik.statura.otel.ProtobufSerializer;
 import io.yupiik.statura.ssl.SslContextService;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -82,6 +83,11 @@ class CheckExecutorTest {
         targetServer.stop(0);
     }
 
+    @AfterEach
+    void reset() {
+        collectorRequests.clear();
+    }
+
     @Test
     void runHttpCheckAndFlushMetrics() throws Exception {
         try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
@@ -106,6 +112,37 @@ class CheckExecutorTest {
             assertEquals(1, collectorRequests.size());
             final var payload = collectorRequests.getFirst();
             assertTrue(payload.contains("smoke_test"));
+        }
+    }
+
+    @Test
+    void customLabels() {
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+            final var sslContextService = new SslContextService();
+            final var httpCheck = new HttpCheck(mapper, Clock.systemUTC(), sslContextService);
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), sslContextService);
+
+            final var checkConfig = new HttpCheckConfiguration(
+                    "http://localhost:" + targetPort + "/ok",
+                    Version.HTTP_1_1, "GET", false, Map.of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null);
+
+            final var executor = new CheckExecutor(
+                    new CheckExecutor.CheckExecutorConfiguration(
+                            List.of(new CheckExecutor.CheckConfig("smoke-test", Map.of("custom-junit", "true"), CheckExecutor.CheckType.HTTP, checkConfig, null, null, null, null)),
+                            new OpenTelemetry("http://localhost:" + collectorPort + "/v1/metrics", Map.of(),
+                                    OpenTelemetry.Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
+                                    Map.of("service.name", "statura", "service.version", "1.0"),
+                                    Map.of("name", "statura", "version", "1.0"),
+                                    OpenTelemetry.AttributeFlattening.ALL),
+                            "PT15M",
+                            "PT30S",
+                            Map.of(),
+                            Map.of(CheckExecutor.CheckType.JDBC.name(), "8")),
+                    httpCheck, null, null, null, null, flusher);
+            executor.run();
+
+            final var payload = collectorRequests.getFirst();
+            assertTrue(payload.contains("\"key\":\"custom-junit\""));
         }
     }
 }
