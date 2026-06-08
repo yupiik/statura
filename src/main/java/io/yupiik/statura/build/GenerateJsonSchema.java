@@ -232,14 +232,38 @@ public final class GenerateJsonSchema implements Runnable {
                              final String documentation,
                              final Object defaultValue,
                              final Map<String, Object> defs) {
+        final boolean isStringKey;
         final Type valueType;
         if (genericType instanceof ParameterizedType pt && pt.getActualTypeArguments().length == 2) {
+            isStringKey = pt.getActualTypeArguments()[0] == String.class;
             valueType = pt.getActualTypeArguments()[1];
         } else {
+            isStringKey = true;
             valueType = String.class;
         }
-        final var valueRaw = valueType instanceof Class ? (Class<?>) valueType : Object.class;
 
+        // Map<String, X> is consumed at runtime as a Properties-format string, not a JSON object
+        if (isStringKey) {
+            final var schema = new LinkedHashMap<String, Object>();
+            schema.put("type", "string");
+            final Object stringDefault;
+            if (defaultValue != null) {
+                final var defaultStr = defaultValue.toString();
+                if (defaultStr.contains("Map.of()")) {
+                    stringDefault = "";
+                } else {
+                    stringDefault = defaultStr;
+                }
+            } else {
+                stringDefault = null;
+            }
+            final var note = "Use key=value syntax, one per line.";
+            final var fullDoc = documentation.isBlank() ? note : documentation + " " + note;
+            addMeta(schema, fullDoc, stringDefault, "string");
+            return schema;
+        }
+
+        final var valueRaw = valueType instanceof Class ? (Class<?>) valueType : Object.class;
         final Object additionalSchema;
         if (PRIMITIVE_TYPES.contains(valueRaw)) {
             additionalSchema = typeOnlySchema(valueRaw);
