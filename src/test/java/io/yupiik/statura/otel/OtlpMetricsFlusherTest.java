@@ -16,6 +16,7 @@
 package io.yupiik.statura.otel;
 
 import com.sun.net.httpserver.HttpServer;
+import io.yupiik.fusion.json.JsonMapper;
 import io.yupiik.fusion.json.internal.JsonMapperImpl;
 import io.yupiik.statura.model.CheckResult;
 import io.yupiik.statura.otel.OpenTelemetry.Protocol;
@@ -35,6 +36,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -67,7 +69,8 @@ class OtlpMetricsFlusherTest {
             final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
             flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
                     Map.of("service.name", "statura", "service.version", "1.0"),
-                    Map.of("name", "statura", "version", "1.0")), List.of());
+                    Map.of("name", "statura", "version", "1.0"),
+                    OpenTelemetry.AttributeFlattening.ALL), List.of());
             assertEquals(0, capturedRequests.size());
         }
     }
@@ -80,7 +83,8 @@ class OtlpMetricsFlusherTest {
                     "test-check", Map.of("url", "http://example.com"), 42, System.nanoTime(), true, null));
             flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
                     Map.of("service.name", "statura", "service.version", "1.0"),
-                    Map.of("name", "statura", "version", "1.0")), results);
+                    Map.of("name", "statura", "version", "1.0"),
+                    OpenTelemetry.AttributeFlattening.ALL), results);
 
             assertEquals(1, capturedRequests.size());
             final var payload = capturedRequests.getFirst();
@@ -98,7 +102,8 @@ class OtlpMetricsFlusherTest {
                     new CheckResult("ko-check", Map.of("url", "http://ko", "status", "500"), 20, 2000L, false, "error"));
             flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
                     Map.of("service.name", "statura", "service.version", "1.0"),
-                    Map.of("name", "statura", "version", "1.0")), results);
+                    Map.of("name", "statura", "version", "1.0"),
+                    OpenTelemetry.AttributeFlattening.ALL), results);
 
             assertEquals(1, capturedRequests.size());
             final var payload = capturedRequests.getFirst();
@@ -127,7 +132,8 @@ class OtlpMetricsFlusherTest {
                 final var ex = assertThrows(IllegalStateException.class,
                         () -> flusher.flush(new OpenTelemetry("http://localhost:" + errPort + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
                                 Map.of("service.name", "statura", "service.version", "1.0"),
-                                Map.of("name", "statura", "version", "1.0")), results));
+                                Map.of("name", "statura", "version", "1.0"),
+                                OpenTelemetry.AttributeFlattening.ALL), results));
                 assertTrue(ex.getMessage().contains("500"));
             }
         } finally {
@@ -150,7 +156,8 @@ class OtlpMetricsFlusherTest {
                     "test", Map.of("url", "http://example.com"), 10, 1000L, true, null));
             flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v2/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
                     Map.of("service.name", "statura", "service.version", "1.0"),
-                    Map.of("name", "statura", "version", "1.0")), results);
+                    Map.of("name", "statura", "version", "1.0"),
+                    OpenTelemetry.AttributeFlattening.ALL), results);
 
             assertEquals(1, capturedRequests.size());
         }
@@ -165,12 +172,193 @@ class OtlpMetricsFlusherTest {
             flusher.flush(new OpenTelemetry(
                     "http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.PROTOBUF, HttpClient.Version.HTTP_1_1,
                     List.of(), "", "", Map.of("service.name", "statura", "service.version", "1.0"),
-                    Map.of("name", "statura", "version", "1.0")), results);
+                    Map.of("name", "statura", "version", "1.0"),
+                    OpenTelemetry.AttributeFlattening.ALL), results);
 
             assertEquals(1, capturedRequests.size());
             final var body = capturedRequests.getFirst();
             assertFalse(body.isEmpty(), body);
             assertFalse(body.startsWith("{"), "protobuf body should not be JSON");
+        }
+    }
+
+    @Test
+    void flushFlattenedAttributes() {
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
+            final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), new SslContextService());
+            final var results = List.of(
+                    new CheckResult("pb-check", Map.of("url", "http://pb", "status", "200"), 15, 3000L, true, null));
+            flusher.flush(new OpenTelemetry(
+                    "http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.JSON, HttpClient.Version.HTTP_1_1,
+                    List.of(), "", "", Map.of("service.name", "statura", "service.version", "1.0"),
+                    Map.of("name", "statura", "version", "1.0"),
+                    OpenTelemetry.AttributeFlattening.ALL), results);
+
+            assertEquals(1, capturedRequests.size());
+            final var body = capturedRequests.getFirst();
+            assertJsonEquals(
+                    mapper, """
+                            {
+                              "resourceMetrics" : [ {
+                                "resource" : {
+                                  "attributes" : [ {
+                                    "value" : {
+                                      "stringValue" : "statura"
+                                    },
+                                    "key" : "service.name"
+                                  }, {
+                                    "value" : {
+                                      "stringValue" : "1.0"
+                                    },
+                                    "key" : "service.version"
+                                  } ]
+                                },
+                                "scopeMetrics" : [ {
+                                  "scope" : {
+                                    "version" : "1.0",
+                                    "name" : "statura"
+                                  },
+                                  "metrics" : [ {
+                                    "gauge" : {
+                                      "dataPoints" : [ {
+                                        "timeUnixNano" : 3000,
+                                        "asDouble" : 15.0,
+                                        "attributes" : [ {
+                                          "value" : {
+                                            "stringValue" : "ok"
+                                          },
+                                          "key" : "check_status"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "200"
+                                          },
+                                          "key" : "status"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "http://pb"
+                                          },
+                                          "key" : "url"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "statura"
+                                          },
+                                          "key" : "service.name"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "1.0"
+                                          },
+                                          "key" : "service.version"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "statura"
+                                          },
+                                          "key" : "name"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "1.0"
+                                          },
+                                          "key" : "version"
+                                        } ]
+                                      } ]
+                                    },
+                                    "name" : "pb_check_duration",
+                                    "unit" : "ms"
+                                  }, {
+                                    "gauge" : {
+                                      "dataPoints" : [ {
+                                        "timeUnixNano" : 3000,
+                                        "asInt" : 1,
+                                        "attributes" : [ {
+                                          "value" : {
+                                            "stringValue" : "ok"
+                                          },
+                                          "key" : "check_status"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "200"
+                                          },
+                                          "key" : "status"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "http://pb"
+                                          },
+                                          "key" : "url"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "statura"
+                                          },
+                                          "key" : "service.name"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "1.0"
+                                          },
+                                          "key" : "service.version"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "statura"
+                                          },
+                                          "key" : "name"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "1.0"
+                                          },
+                                          "key" : "version"
+                                        } ]
+                                      } ]
+                                    },
+                                    "name" : "pb_check_status",
+                                    "unit" : "1"
+                                  }, {
+                                    "sum" : {
+                                      "aggregationTemporality" : 2,
+                                      "dataPoints" : [ {
+                                        "timeUnixNano" : 3000,
+                                        "asInt" : 1,
+                                        "attributes" : [ {
+                                          "value" : {
+                                            "stringValue" : "ok"
+                                          },
+                                          "key" : "check_status"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "200"
+                                          },
+                                          "key" : "status"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "http://pb"
+                                          },
+                                          "key" : "url"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "statura"
+                                          },
+                                          "key" : "service.name"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "1.0"
+                                          },
+                                          "key" : "service.version"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "statura"
+                                          },
+                                          "key" : "name"
+                                        }, {
+                                          "value" : {
+                                            "stringValue" : "1.0"
+                                          },
+                                          "key" : "version"
+                                        } ]
+                                      } ],
+                                      "isMonotonic" : false
+                                    },
+                                    "name" : "pb_check_results",
+                                    "unit" : "1"
+                                  } ]
+                                } ]
+                              } ]
+                            }""", body);
         }
     }
 
@@ -183,10 +371,43 @@ class OtlpMetricsFlusherTest {
             flusher.flush(new OpenTelemetry("http://localhost:" + port + "/v1/metrics", Map.of(), Protocol.PROTOBUF,
                     HttpClient.Version.HTTP_1_1, List.of(), "", "",
                     Map.of("service.name", "statura", "service.version", "1.0"),
-                    Map.of("name", "statura", "version", "1.0")), results);
+                    Map.of("name", "statura", "version", "1.0"),
+                    OpenTelemetry.AttributeFlattening.ALL), results);
             assertEquals(1, capturedRequests.size());
             final var body = capturedRequests.getFirst();
             assertFalse(body.isEmpty());
+        }
+    }
+
+    private void assertJsonEquals(final JsonMapper mapper, final String expected, final String actual) {
+        final var expectedModel = mapper.fromString(Object.class, expected);
+        final var actualModel = mapper.fromString(Object.class, actual);
+        assertJsonContains(expectedModel, actualModel);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertJsonContains(final Object expected, final Object actual) {
+        if (expected == null) {
+            assertNull(actual);
+            return;
+        }
+        switch (expected) {
+            case Map<?, ?> expectedMap -> {
+                final var actualMap = (Map<String, Object>) actual;
+                for (final var entry : expectedMap.entrySet()) {
+                    final var key = String.valueOf(entry.getKey());
+                    assertTrue(actualMap.containsKey(key), "Missing key: " + key);
+                    assertJsonContains(entry.getValue(), actualMap.get(key));
+                }
+            }
+            case List<?> expectedList -> {
+                final var actualList = (List<Object>) actual;
+                assertEquals(expectedList.size(), actualList.size(), "Array size mismatch");
+                for (int i = 0; i < expectedList.size(); i++) {
+                    assertJsonContains(expectedList.get(i), actualList.get(i));
+                }
+            }
+            default -> assertEquals(expected, actual);
         }
     }
 }

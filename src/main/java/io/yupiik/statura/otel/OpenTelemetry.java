@@ -47,7 +47,11 @@ public record OpenTelemetry(
         Map<String, String> resourceAttributes,
 
         @Property(value = "scope-attributes", documentation = "Instrumentation scope attributes (e.g. name, version).", defaultValue = "java.util.Map.of(\"name\", \"statura\", \"version\", \"1.0\")")
-        Map<String, String> scopeAttributes
+        Map<String, String> scopeAttributes,
+
+        @Property(value = "flatten-attributes", documentation = "Should resource and/or scope attributes be merged with metrics attributes. Mainly useful when prometheus is not configured to handle global attributes.", defaultValue = "io.yupiik.statura.otel.OpenTelemetry.AttributeFlattening.NONE")
+        AttributeFlattening flattenAttributes
 ) {
     public enum Protocol { JSON, PROTOBUF }
+    public enum AttributeFlattening { NONE, ALL, RESOURCE, SCOPE }
 }

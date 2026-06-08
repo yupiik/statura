@@ -12,5 +12,6 @@ generated
 generated_*
 .sdkmanrc
 src/main/minisite/content/cli
+.generated
 pom.xml.releaseBackup
 release.properties

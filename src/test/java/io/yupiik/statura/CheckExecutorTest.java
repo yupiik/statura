@@ -84,14 +84,14 @@ class CheckExecutorTest {
 
     @Test
     void runHttpCheckAndFlushMetrics() throws Exception {
-        try (final var mapper = new JsonMapperImpl(List.of(), c -> empty())) {
+        try (final var mapper = new JsonMapperImpl(List.of(), _ -> empty())) {
             final var sslContextService = new SslContextService();
             final var httpCheck = new HttpCheck(mapper, Clock.systemUTC(), sslContextService);
             final var flusher = new OtlpMetricsFlusher(mapper, new ProtobufSerializer(), sslContextService);
 
             final var checkConfig = new HttpCheckConfiguration(
                     "http://localhost:" + targetPort + "/ok",
-                    Version.HTTP_1_1, "GET", false, Map.<String, String>of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null);
+                    Version.HTTP_1_1, "GET", false, Map.of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null);
 
             final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "smoke-test", checkConfig).get();
             assertTrue(result.success());
@@ -100,7 +100,8 @@ class CheckExecutorTest {
             flusher.flush(new OpenTelemetry("http://localhost:" + collectorPort + "/v1/metrics", Map.of(),
                     OpenTelemetry.Protocol.JSON, HttpClient.Version.HTTP_1_1, List.of(), "", "",
                     Map.of("service.name", "statura", "service.version", "1.0"),
-                    Map.of("name", "statura", "version", "1.0")), results);
+                    Map.of("name", "statura", "version", "1.0"),
+                    OpenTelemetry.AttributeFlattening.ALL), results);
 
             assertEquals(1, collectorRequests.size());
             final var payload = collectorRequests.getFirst();
