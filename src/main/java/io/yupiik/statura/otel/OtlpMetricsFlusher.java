@@ -26,12 +26,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.net.http.HttpResponse.BodyHandlers.ofString;
+import static java.util.Comparator.comparing;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 @ApplicationScoped
 public class OtlpMetricsFlusher {
@@ -55,9 +59,24 @@ public class OtlpMetricsFlusher {
         final var prometheusCleaner = Pattern.compile("[^a-zA-Z0-9_:]");
 
         final var resourceAttributes = openTelemetry.resourceAttributes().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
                 .map(e -> attr(e.getKey(), e.getValue()))
                 .toList();
 
+        final var mergeableAttributes = switch (openTelemetry.flattenAttributes()) {
+            case NONE -> List.of();
+            case RESOURCE -> resourceAttributes;
+            case SCOPE -> openTelemetry.scopeAttributes().entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .map(e -> attr(e.getKey(), e.getValue()))
+                    .toList();
+            case ALL -> Stream.concat(
+                            resourceAttributes.stream(),
+                            openTelemetry.scopeAttributes().entrySet().stream()
+                                    .sorted(Map.Entry.comparingByKey())
+                                    .map(e -> attr(e.getKey(), e.getValue())))
+                    .toList();
+        };
         final var payload = Map.of(
                 "resourceMetrics", List.of(Map.of(
                         "resource", Map.of(
@@ -66,7 +85,7 @@ public class OtlpMetricsFlusher {
                                 "scope", openTelemetry.scopeAttributes(),
                                 "metrics", results.stream()
                                         .flatMap(check -> {
-                                            final var baseAttributes = Stream.concat(
+                                            final var baseAttributes = Stream.of(
                                                             Stream.of(
                                                                     attr("check_status", check.success() ? "ok" : "ko")),
                                                             Stream.concat(
@@ -77,8 +96,11 @@ public class OtlpMetricsFlusher {
                                                                             .flatMap(error -> Stream.of(
                                                                                     attr("error.message", error))),
                                                                     check.metadata().entrySet().stream()
+                                                                            .sorted(Map.Entry.comparingByKey())
                                                                             .map(e -> attr(e.getKey(), e.getValue()))
-                                                            ))
+                                                            ),
+                                                            mergeableAttributes.stream())
+                                                    .flatMap(identity())
                                                     .toList();
 
                                             final var ts = check.timestampNanos();
