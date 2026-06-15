@@ -57,7 +57,10 @@ public record HttpCheckConfiguration(
         String sslClientCertificate,
 
         @Property(value = "ssl-client-private-key", documentation = "Client private key in PEM format (PKCS#8) for mTLS.")
-        String sslClientPrivateKey
+        String sslClientPrivateKey,
+
+        @Property(value = "ssl-trust-all-certificates", documentation = "Enable to trust all certificates (do not enable for production environment.", defaultValue = "false")
+        boolean sslTrustAllCertificates
 ) {
     public record Assertion(
             @Property(value = "json-pointer", documentation = "JSON-Pointer to extract.", defaultValue = "\"/\"")

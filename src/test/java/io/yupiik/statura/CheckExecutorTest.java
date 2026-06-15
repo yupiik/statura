@@ -97,7 +97,8 @@ class CheckExecutorTest {
 
             final var checkConfig = new HttpCheckConfiguration(
                     "http://localhost:" + targetPort + "/ok",
-                    Version.HTTP_1_1, "GET", false, Map.of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null);
+                    Version.HTTP_1_1, "GET", false, Map.of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(),
+                    null, null, null, false);
 
             final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "smoke-test", checkConfig).get();
             assertTrue(result.success());
@@ -124,7 +125,8 @@ class CheckExecutorTest {
 
             final var checkConfig = new HttpCheckConfiguration(
                     "http://localhost:" + targetPort + "/ok",
-                    Version.HTTP_1_1, "GET", false, Map.of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null);
+                    Version.HTTP_1_1, "GET", false, Map.of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(),
+                    null, null, null, false);
 
             final var executor = new CheckExecutor(
                     new CheckExecutor.CheckExecutorConfiguration(

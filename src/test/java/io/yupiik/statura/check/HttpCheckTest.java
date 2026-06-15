@@ -104,7 +104,8 @@ class HttpCheckTest {
     void successfulCheck(@Fusion final HttpCheck httpCheck) throws Exception {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-ok", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/ok", HTTP_1_1, "GET", false,
-                Map.<String, String>of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null
+                Map.<String, String>of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(),
+                null, null, null, false
         )).get();
 
         assertTrue(result.success());
@@ -117,7 +118,8 @@ class HttpCheckTest {
     void timeout(@Fusion final HttpCheck httpCheck) throws Exception {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-timeout", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/slow", HTTP_1_1, "GET", false,
-                Map.<String, String>of(), "", "PT0.1S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null
+                Map.<String, String>of(), "", "PT0.1S", 200, List.<HttpCheckConfiguration.Assertion>of(),
+                null, null, null, false
         )).get();
 
         assertFalse(result.success());
@@ -128,7 +130,8 @@ class HttpCheckTest {
     void notFound(@Fusion final HttpCheck httpCheck) throws Exception {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-404", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/not-found", HTTP_1_1, "GET", false,
-                Map.<String, String>of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null
+                Map.<String, String>of(), "", "PT10S", 200, List.<HttpCheckConfiguration.Assertion>of(),
+                null, null, null, false
         )).get();
 
         assertFalse(result.success());
@@ -139,7 +142,8 @@ class HttpCheckTest {
     void customExpectedStatus(@Fusion final HttpCheck httpCheck) throws Exception {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-404-custom", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/not-found", HTTP_1_1, "GET", false,
-                Map.<String, String>of(), "", "PT10S", 404, List.<HttpCheckConfiguration.Assertion>of(), null, null, null
+                Map.<String, String>of(), "", "PT10S", 404, List.<HttpCheckConfiguration.Assertion>of(),
+                null, null, null, false
         )).get();
 
         assertTrue(result.success());
@@ -151,7 +155,8 @@ class HttpCheckTest {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-assert", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/assert", HTTP_1_1, "GET", false,
                 Map.<String, String>of(), "", "PT10S", 200,
-                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.EQUALS, "42")), null, null, null
+                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.EQUALS, "42")),
+                null, null, null, false
         )).get();
 
         assertTrue(result.success());
@@ -162,7 +167,8 @@ class HttpCheckTest {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-assert", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/assert", HTTP_1_1, "GET", false,
                 Map.<String, String>of(), "", "PT10S", 200,
-                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.GTE, "40")), null, null, null
+                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.GTE, "40")),
+                null, null, null, false
         )).get();
 
         assertTrue(result.success());
@@ -173,7 +179,8 @@ class HttpCheckTest {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-assert-fail", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/assert-fail", HTTP_1_1, "GET", false,
                 Map.<String, String>of(), "", "PT10S", 200,
-                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.GTE, "20")), null, null, null
+                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.GTE, "20")),
+                null, null, null, false
         )).get();
 
         assertFalse(result.success());
@@ -184,7 +191,8 @@ class HttpCheckTest {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-assert-fail", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/assert", HTTP_1_1, "GET", false,
                 Map.<String, String>of(), "", "PT10S", 200,
-                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.EQUALS, "99")), null, null, null
+                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.EQUALS, "99")),
+                null, null, null, false
         )).get();
 
         assertFalse(result.success());
@@ -197,7 +205,8 @@ class HttpCheckTest {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-assert", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/assert", HTTP_1_1, "GET", false,
                 Map.<String, String>of(), "", "PT10S", 200,
-                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.EXISTS, "true")), null, null, null
+                List.of(new HttpCheckConfiguration.Assertion("/score", HttpCheckConfiguration.AssertionOperator.EXISTS, "true")),
+                null, null, null, false
         )).get();
 
         assertTrue(result.success());
@@ -208,7 +217,8 @@ class HttpCheckTest {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-assert", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/assert", HTTP_1_1, "GET", false,
                 Map.<String, String>of(), "", "PT10S", 200,
-                List.of(new HttpCheckConfiguration.Assertion("/missing", HttpCheckConfiguration.AssertionOperator.EXISTS, "true")), null, null, null
+                List.of(new HttpCheckConfiguration.Assertion("/missing", HttpCheckConfiguration.AssertionOperator.EXISTS, "true")),
+                null, null, null, false
         )).get();
 
         assertFalse(result.success());
@@ -219,7 +229,8 @@ class HttpCheckTest {
         final var badPort = 19876;
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-error", new HttpCheckConfiguration(
                 "http://localhost:" + badPort + "/nope", HTTP_1_1, "GET", false,
-                Map.<String, String>of(), "", "PT5S", 200, List.<HttpCheckConfiguration.Assertion>of(), null, null, null
+                Map.<String, String>of(), "", "PT5S", 200, List.<HttpCheckConfiguration.Assertion>of(),
+                null, null, null, false
         )).get();
 
         assertFalse(result.success());
@@ -231,7 +242,8 @@ class HttpCheckTest {
         final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-headers", new HttpCheckConfiguration(
                 "http://localhost:" + port + "/headers", HTTP_1_1, "GET", false,
                 Map.of("Authorization", "Bearer test123"), "", "PT10S", 200,
-                List.of(new HttpCheckConfiguration.Assertion("/auth", HttpCheckConfiguration.AssertionOperator.EQUALS, "Bearer test123")), null, null, null
+                List.of(new HttpCheckConfiguration.Assertion("/auth", HttpCheckConfiguration.AssertionOperator.EQUALS, "Bearer test123")),
+                null, null, null, false
         )).get();
 
         assertTrue(result.success());

@@ -124,7 +124,7 @@ class HttpCheckSslTest {
                 new HttpCheckConfiguration(
                         "https://localhost:" + port + "/ok", HTTP_1_1, "GET", false,
                         Map.of(), "", "PT10S", 200, List.of(),
-                        List.of(serverCertPem), null, null)).get();
+                        List.of(serverCertPem), null, null, false)).get();
 
         assertTrue(result.success());
         assertEquals("test-https", result.name());
@@ -138,7 +138,7 @@ class HttpCheckSslTest {
                 new HttpCheckConfiguration(
                         "https://localhost:" + port + "/ok", HTTP_1_1, "GET", false,
                         Map.of(), "", "PT10S", 200, List.of(),
-                        null, null, null)).get();
+                        null, null, null, false)).get();
 
         assertNotNull(result.errorMessage());
     }
@@ -149,7 +149,7 @@ class HttpCheckSslTest {
                 new HttpCheckConfiguration(
                         "https://localhost:" + port + "/ok", HTTP_1_1, "GET", false,
                         Map.of(), "", "PT10S", 200, List.of(),
-                        List.of(serverCertPem), serverCertPem, serverKeyPem)).get();
+                        List.of(serverCertPem), serverCertPem, serverKeyPem, false)).get();
 
         assertTrue(result.success());
         assertEquals("200", result.metadata().get("http.response.status_code"));
