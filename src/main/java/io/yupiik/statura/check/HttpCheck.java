@@ -25,6 +25,7 @@ import io.yupiik.statura.model.CheckResult;
 import io.yupiik.statura.ssl.SslConfiguration;
 import io.yupiik.statura.ssl.SslContextService;
 
+import javax.net.ssl.SSLParameters;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -71,6 +72,9 @@ public class HttpCheck {
                 check.sslCertificates(), check.sslClientCertificate(), check.sslClientPrivateKey()));
         if (sslContext != null) {
             httpBuilder.sslContext(sslContext);
+        } else if (check.sslTrustAllCertificates()) {
+            httpBuilder.sslContext(sslContextService.insecureSslContext)
+                    .sslParameters(sslContextService.sslParameters);
         }
 
         final var delegate = httpBuilder.build();
