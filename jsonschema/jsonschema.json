@@ -192,6 +192,11 @@
           "type": "string",
           "description": "Client private key in PEM format (PKCS#8) for mTLS."
         },
+        "ssl-trust-all-certificates": {
+          "type": "boolean",
+          "description": "Enable to trust all certificates (do not enable for production environment.",
+          "default": false
+        },
         "timeout": {
           "type": "string",
           "description": "Custom (java duration formatted) timeout for this check.",
