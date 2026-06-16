@@ -522,6 +522,7 @@ java \
                     <container>
                         <appRoot>${image.workdir}</appRoot>
                         <workingDirectory>${image.workdir}</workingDirectory>
+                        <extraClasspath>${image.workdir}/custom/*:${image.workdir}/custom</extraClasspath>
                         <mainClass>io.yupiik.fusion.framework.api.main.CliLauncher</mainClass>
                         <jvmFlags>
                             <jvmFlag>-XX:MaxRAMPercentage=75</jvmFlag>
