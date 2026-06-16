@@ -723,6 +723,7 @@ under the License.
             </build>
         </profile>
 
+        <!-- mvn package -Pgh-pages -->
         <profile>
             <id>gh-pages</id>
             <properties>
