@@ -85,7 +85,13 @@ public class SslContextService {
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new IllegalArgumentException("error when creating insecure ssl context");
         }
+    }
 
+    public SSLContext buildSslContext(final SslConfiguration config, final boolean trustAll) {
+        if (trustAll) {
+            return insecureSslContext;
+        }
+        return buildSslContext(config);
     }
 
     public SSLContext buildSslContext(final SslConfiguration config) {

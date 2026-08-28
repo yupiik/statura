@@ -68,13 +68,15 @@ public class HttpCheck {
                 .executor(pipelineExecutor)
                 .followRedirects(check.followRedirects() ? HttpClient.Redirect.ALWAYS : HttpClient.Redirect.NEVER);
 
-        final var sslContext = sslContextService.buildSslContext(new SslConfiguration(
-                check.sslCertificates(), check.sslClientCertificate(), check.sslClientPrivateKey()));
+        final var sslContext = sslContextService.buildSslContext(
+                new SslConfiguration(
+                        check.sslCertificates(), check.sslClientCertificate(), check.sslClientPrivateKey()),
+                check.sslTrustAllCertificates());
         if (sslContext != null) {
             httpBuilder.sslContext(sslContext);
-        } else if (check.sslTrustAllCertificates()) {
-            httpBuilder.sslContext(sslContextService.insecureSslContext)
-                    .sslParameters(sslContextService.sslParameters);
+            if (check.sslTrustAllCertificates() && sslContextService.sslParameters != null) {
+                httpBuilder.sslParameters(sslContextService.sslParameters);
+            }
         }
 
         final var delegate = httpBuilder.build();

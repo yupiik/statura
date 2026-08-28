@@ -155,4 +155,17 @@ class HttpCheckSslTest {
         assertEquals("200", result.metadata().get("http.response.status_code"));
         assertNull(result.errorMessage());
     }
+
+    @Test
+    void httpsWithTrustAllCertificates(@Fusion final HttpCheck httpCheck) throws Exception {
+        final var result = httpCheck.check(List.of(), Runnable::run, Duration.ofSeconds(30), "test-trust-all",
+                new HttpCheckConfiguration(
+                        "https://localhost:" + port + "/ok", HTTP_1_1, "GET", false,
+                        Map.of(), "", "PT10S", 200, List.of(),
+                        null, null, null, true)).get();
+
+        assertTrue(result.success());
+        assertEquals("200", result.metadata().get("http.response.status_code"));
+        assertNull(result.errorMessage());
+    }
 }
