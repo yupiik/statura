@@ -30,11 +30,12 @@ public class JsonConfigurationProducer {
                 .orElse("statura.json");
         configurationRegistration
                 .addSource()
-                .accept(new JsonConfigurationSource(ReaderSupplier.from(location, "{}")) {
-                    @Override
-                    public String get(final String key) { // CLI to config style
-                        return super.get(key.replace('-', '.'));
-                    }
-                });
+                .accept(new JsonConfigurationSource(
+                        ReaderSupplier.from(location, "{}"),
+                        JsonConfigurationProducer::normalizeKey));
+    }
+
+    private static String normalizeKey(final String key) {
+        return key.replace('-', '.');
     }
 }
