@@ -1,0 +1,9 @@
+{
+  "checks": [
+    {
+      "http": {
+        "expected-status": 123
+      }
+    }
+  ]
+}
