@@ -21,7 +21,7 @@
 
     <groupId>io.yupiik.observability</groupId>
     <artifactId>statura</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7-SNAPSHOT</version>
     <name>Yupiik Statura</name>
     <description>OTEL synthetic monitoring probe for URL/health checks.</description>
     <url>https://yupiik.github.io/statura/</url>
