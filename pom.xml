@@ -688,7 +688,7 @@ under the License.
                         </property>
                         <property>
                             <key>statura.configurationLocation</key>
-                            <value>${project.basedir}/config.json</value>
+                            <value>${project.build.directory}/config.json</value>
                         </property>
                     </systemProperties>
                 </configuration>
