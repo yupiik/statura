@@ -27,7 +27,7 @@ So it can look to:
 include::{partialsdir}/generated/dependencies.sample-command.adoc[]
 ----
 
-or if you put all libraries in `lib/` folder: `java -cp lib/*.jar com.tmf.catalog.Tmf620ApiProductCatalogApplication $args`.
+or if you put all libraries in `lib/` folder: `java -cp lib/*.jar io.yupiik.fusion.framework.api.main.CliLauncher $args`.
 
 TIP: all libraries are available on maven link:https://repo.maven.apache.org/maven2/io/yupiik[central].
 

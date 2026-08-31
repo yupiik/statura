@@ -1,0 +1,25 @@
+= Docker compose test
+
+Use this docker compose project to test a jdbc connexion.
+
+== Copy the JDBC drivers
+
+Copy from https://jdbc.postgresql.org/download/postgresql-42.7.13.jar into the `./custom` directory.
+
+== Run the docker compose
+
+[source,bash]
+----
+docker compose up
+----
+
+You should see the check successful.
+
+[source,bash]
+----
+statura-health        | {"timestamp":"2026-08-31T13:58:59.077Z","level":"INFO","logger":"io.yupiik.statura.CheckExecutor","method":"log","message":"Found 1 checks","class":"io.yupiik.logging.jul.logger.YupiikLogger"}
+statura-health        | {"timestamp":"2026-08-31T13:58:59.083Z","level":"INFO","logger":"io.yupiik.statura.CheckExecutor","method":"log","message":"Running 'statura_health' (type=JDBC)","class":"io.yupiik.logging.jul.logger.YupiikLogger"}
+statura-health        | {"timestamp":"2026-08-31T13:58:59.236Z","level":"INFO","logger":"io.yupiik.statura.CheckExecutor","method":"log","message":"Executed 'statura_health' (type=JDBC): success=true","class":"io.yupiik.logging.jul.logger.YupiikLogger"}
+statura-health        | {"timestamp":"2026-08-31T13:58:59.241Z","level":"INFO","logger":"io.yupiik.statura.CheckExecutor","method":"log","message":"Completed 1 checks (1 ok, 0 ko)","class":"io.yupiik.logging.jul.logger.YupiikLogger"}
+statura-health        | {"timestamp":"2026-08-31T13:58:59.385Z","level":"INFO","logger":"io.yupiik.statura.CheckExecutor","method":"log","message":"Metrics pushed to 'http://statura-otel-collector:4318/v1/metrics'","class":"io.yupiik.logging.jul.logger.YupiikLogger"}
+----

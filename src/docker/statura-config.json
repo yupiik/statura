@@ -1,0 +1,23 @@
+{
+  "$schema": "https://www.yupiik.io/statura/jsonschema/jsonschema.json",
+  "checks": [
+    {
+      "name": "statura_health",
+      "type": "JDBC",
+      "jdbc": {
+        "url": "jdbc:postgresql://statura-database:5432/statura",
+        "username": "statura",
+        "password": "statura",
+        "validationQuery": "SELECT 1",
+        "timeout": "PT30S"
+      },
+      "attributes": "app.environment=DEV\napp.name=statura-test"
+    }
+  ],
+  "opentelemetry": {
+    "endpoint": "http://statura-otel-collector:4318/v1/metrics",
+    "flatten-attributes": "ALL"
+  },
+  "execution-timeout": "PT45S",
+  "default-timeout": "PT10S"
+}

@@ -1,0 +1,46 @@
+services:
+
+  statura-database:
+    container_name: statura-database
+    image: postgres
+    environment:
+      POSTGRES_DB: statura
+      POSTGRES_USER: statura
+      POSTGRES_PASSWORD: statura
+      PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U statura" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  statura-otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.149.0
+    container_name: otel-collector-debug
+    command: [ "--config=/etc/otelcol/config.yaml" ]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    restart: unless-stopped
+
+  statura-health:
+    container_name: statura-health
+    image: ossyupiik/statura:1.0.6
+    command: ["executor"]
+    environment:
+      STATURA_CONFIGURATIONLOCATION: "/opt/yupiik/statura/config/statura-config.json"
+    volumes:
+      - ./custom/postgresql-42.7.13.jar:/opt/yupiik/statura/custom/postgresql-42.7.13.jar:ro
+      - ./statura-config.json:/opt/yupiik/statura/config/statura-config.json:ro
+    restart: no
+    depends_on:
+      statura-database:
+        condition: service_healthy
+      statura-otel-collector:
+        condition: service_started
